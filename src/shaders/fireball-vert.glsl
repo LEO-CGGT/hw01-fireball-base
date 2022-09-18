@@ -79,7 +79,8 @@ float fbm(vec3 noise)
     float freq = 2.0f;
     float amp = 0.5f;
 
-    noise += 0.5 + 0.5 * sin(u_Time / 500.0);
+    noise += sin(u_Time/1000.0);
+
     for (int i=1; i<=octaves; i++)
     {
         total += interpNoise3D(noise * freq) * amp;
@@ -144,33 +145,17 @@ void main()
 
     vec4 modelposition = u_Model * vs_Pos;   // Temporarily store the transformed vertex positions for use below
 
-    float worley = WorleyNoise(3.0 * vs_Pos.xyz);
+    float worley = WorleyNoise(5.0 * vs_Pos.xyz);
     float fbm1 = fbm(vs_Pos.xyz);
-    float fbm2 = fbm(vs_Pos.zyx);
 
-    //float modelposition_change1 = mix(0.0, 1.0,  worley);
-    //float modelposition_change2 = mix(0.0, 1.0,  fbmo);
-    //float modelposition_change2 = mix(0.0, 0.6,  length(cos(vs_Pos.xyz)));
-    //vec4 modelposition_sin = cos(vs_Pos) * sin(u_Time / 1000.0) + 0.5;    
-
-    //float amount = sin(fbmo);
-
-    //float d1 = (0.7 * worley + 0.5 * fbmo);
-    //float d2 = (0.4 * worley + 0.8 * fbmo);
 
     float theta = atan(modelposition.y / modelposition.x);
     float phi = atan(length(modelposition.xy) / modelposition.z);
 
-    //h = mix(0.0, fbmo, cos(u_Time / 200.0) + 1.0);
-    //h = mix(0.0, 1.0, cos(modelposition.x/modelposition.y));
-    //h = mix(sin(worley) + 1.0, sin(worley + 0.5) + 1.0, cos(u_Time / 500.0) + 1.0);
-    h = 15.0 * (sin(worley) + 1.0);
-    //h +=  20.0 * mix(fbm1, fbm2, cos(u_Time / 500.0)+1.0);
-    h +=  20.0 * fbm1;
+    h = 2.0 * (sin(worley));
+    h +=  0.5 * fbm1;
 
-    modelposition = modelposition + fs_Nor * 0.02 * h;
-    //modelposition = mix(modelposition + d1 * fs_Nor,  modelposition + d2 * fs_Nor, cos(u_Time / 400.0) + 1.0);
-    //modelposition = modelposition + fs_Nor *  (sin(phi) + 2.0 + sin(theta));
+    modelposition = modelposition + fs_Nor * 0.4 * h;
 
     fs_Pos = modelposition;
     
