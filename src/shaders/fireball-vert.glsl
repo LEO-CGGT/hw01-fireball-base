@@ -188,12 +188,12 @@ float WorleyNoise(vec3 p)
             for(int x = -1; x <= 1; ++x) 
             {
                 vec3 neighbor = vec3(float(x), float(y), float(z)); // Direction in which neighbor cell lies
-                //vec3 point = random3(pInt + neighbor); // Get the Voronoi centerpoint for the neighboring cell
+                vec3 point = random3(pInt + neighbor); // Get the Voronoi centerpoint for the neighboring cell
                 
-                //point = 0.5 + 0.5*sin(u_Time / 1000.0 + 6.2831*point);
+                point = 0.5 + 0.5*sin(u_Time / 1000.0 + 6.2831*point);
                 
-                //vec3 diff = neighbor + point - pFract; // Distance between fragment coord and neighbor’s Voronoi point
-                vec3 diff = neighbor - pFract; // Distance between fragment coord and neighbor’s Voronoi point
+                vec3 diff = neighbor + point - pFract; // Distance between fragment coord and neighbor’s Voronoi point
+                //vec3 diff = neighbor - pFract; // Distance between fragment coord and neighbor’s Voronoi point
                 float dist = length(diff);
                 minDist = min(minDist, dist);
             }
@@ -304,13 +304,13 @@ void main()
 
     worley = sinSmooth(worley);
 
-    h = 4.0 * worley;
+    h = 1.0 * worley;
     //h += 2.0 * sin(fbmWorley(vs_Pos.yzx, 2.0));
     //h += 1.0 * sin(fbmWorley(vs_Pos.zxy, 4.0));
 
     //h +=  0.5 * fbm1;
 
-    modelposition = modelposition + fs_Nor * 0.25 * h * u_Height;
+    modelposition = modelposition + fs_Nor * 1.0 * h * u_Height;
 
     fs_H = h;
 

@@ -59,7 +59,8 @@ void main()
         vec3 red = vec3(240.0,51.0,3.0);
         //vec3 color = mix(yellow, orange, smoothstep(0.0, 0.7, map(length(fs_Pos), 1.0, 2.0, 0.0, 1.0))); 
         //color = mix(color, red, smoothstep(0.7, 1.0, map(length(fs_Pos), 1.0, 2.0, 0.0, 1.0))); 
+        vec3 color = mix(yellow, red, smoothstep(0.0, 1.0, fs_H));
 
-        vec3 color = mix(yellow, red, smoothstep(0.0, 1.0, map(fs_H, 0.0, 5.0, 0.0, 1.0)));
+        //vec3 color = mix(yellow, red, smoothstep(0.0, 1.0, map(fs_H, 0.0, 1.0, 0.0, 1.0)));
         out_Col = vec4(color.rgb / 255.0, diffuseColor.a);
 }
