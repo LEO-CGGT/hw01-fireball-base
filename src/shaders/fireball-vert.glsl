@@ -25,6 +25,8 @@ uniform mat4 u_ViewProj;    // The matrix that defines the camera's transformati
 
 uniform float u_Time; 
 
+uniform float u_Height;
+
 in vec4 vs_Pos;             // The array of vertex positions passed to the shader
 
 in vec4 vs_Nor;             // The array of vertex normals passed to the shader
@@ -35,6 +37,8 @@ out vec4 fs_Pos;
 out vec4 fs_Nor;            // The array of normals that has been transformed by u_ModelInvTr. This is implicitly passed to the fragment shader.
 out vec4 fs_LightVec;       // The direction in which our virtual light lies, relative to each vertex. This is implicitly passed to the fragment shader.
 out vec4 fs_Col;            // The color of each vertex. This is implicitly passed to the fragment shader.
+
+out float fs_H; // displacement
 
 const vec4 lightPos = vec4(5, 5, 3, 1); //The position of our virtual light, which is used to compute the shading of
                                         //the geometry in the fragment shader.
@@ -78,9 +82,7 @@ float fbm(vec3 noise)
     int octaves = 8;
     float freq = 2.0f;
     float amp = 0.5f;
-
-    noise += sin(u_Time/1000.0);
-
+    
     for (int i=1; i<=octaves; i++)
     {
         total += interpNoise3D(noise * freq) * amp;
@@ -123,6 +125,32 @@ float WorleyNoise(vec3 p)
     return minDist;
 }
 
+
+// https://thebookofshaders.com/13
+float fbmWorley(vec3 p, float freq) {
+    float sum = 0.0;
+    float persistence = 0.5;
+
+    vec3 shift = vec3(1000.0);
+    float time = u_Time / 1.0;
+    mat3 rot = mat3(cos(time), sin(time),0.0, 
+                    -sin(time), cos(time), 0.0,
+                    0.0, 0.0, 1.0);
+
+    for(int i = 0; i < 4; ++i) {
+        sum += persistence * WorleyNoise(p * freq);
+        //p = rot * p + shift;
+        persistence *= 0.5;
+        freq *= 2.0;
+    }
+    return sum;
+}
+
+float sinSmooth(float x)
+{
+    return sin(x * 3.14159 * 0.5);
+}
+
 void main()
 {
     float radius = 1.0f;
@@ -132,7 +160,6 @@ void main()
     //fs_Pos = vs_Pos;
 
     float h = 0.0;      // displacement amount
-    
 
 
     mat3 invTranspose = mat3(u_ModelInvTr);
@@ -145,17 +172,28 @@ void main()
 
     vec4 modelposition = u_Model * vs_Pos;   // Temporarily store the transformed vertex positions for use below
 
-    float worley = WorleyNoise(5.0 * vs_Pos.xyz);
-    float fbm1 = fbm(vs_Pos.xyz);
-
-
     float theta = atan(modelposition.y / modelposition.x);
     float phi = atan(length(modelposition.xy) / modelposition.z);
 
-    h = 2.0 * (sin(worley));
-    h +=  0.5 * fbm1;
+//    float worley = fbmWorley(vs_Pos.xyz, 1.0);
+    vec3 temp_pos = vs_Pos.xyz + u_Time / 1000.0;
+//    float temp_scale = fbmWorley(vs_Pos.xyz, 1.0) * sin(u_Time / 1000.0);
+    float temp_scale = fbmWorley(vs_Pos.xyz, 1.0);
+    float worley = fbm(temp_scale + temp_pos);
+//    float worley = fbm(fbm(fbmWorley(vs_Pos.xyz, 1.0) + vs_Pos.xyz) + vs_Pos.xyz);
 
-    modelposition = modelposition + fs_Nor * 0.4 * h;
+
+    worley = sinSmooth(worley);
+
+    h = 4.0 * worley;
+    //h += 2.0 * sin(fbmWorley(vs_Pos.yzx, 2.0));
+    //h += 1.0 * sin(fbmWorley(vs_Pos.zxy, 4.0));
+
+    //h +=  0.5 * fbm1;
+
+    modelposition = modelposition + fs_Nor * 0.25 * h * u_Height;
+
+    fs_H = h;
 
     fs_Pos = modelposition;
     

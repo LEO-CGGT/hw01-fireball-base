@@ -26,7 +26,8 @@ const controls = {
   'Expand': changeToExpand,
   'Collapse': changeToCollapse,
   'Distort':changeToDistort,
-  'Fireball':loadFireBall,
+  'Load Fireball':loadFireBall,
+  Height: 1.0,
 };
 
 let icosphere: Icosphere;
@@ -114,7 +115,10 @@ function main() {
   vertShaderGUI.add(controls, 'Expand');
   vertShaderGUI.add(controls, 'Collapse');
   vertShaderGUI.add(controls, 'Distort');
-  gui.add(controls, 'Fireball');
+  
+  var fireballGUI = gui.addFolder('Fireball');
+  fireballGUI.add(controls, 'Load Fireball');
+  fireballGUI.add(controls, 'Height', 0, 10).step(0.1);
 
 
   // get canvas and webgl context
@@ -135,6 +139,7 @@ function main() {
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.2, 0.2, 0.2, 1);
   gl.enable(gl.DEPTH_TEST);
+  gl.depthFunc(gl.LEQUAL);
 
   const lambert = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.glsl')),
@@ -169,7 +174,7 @@ function main() {
       icosphere,
       // square,
        //cube,
-    ], controls.R, controls.G, controls.B, controls.A );
+    ], controls.R, controls.G, controls.B, controls.A, controls.Height);
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame

@@ -31,6 +31,8 @@ class ShaderProgram {
   unifColor: WebGLUniformLocation;
   unifTime: WebGLUniformLocation;
 
+  unifHeight: WebGLUniformLocation;
+
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
 
@@ -50,6 +52,7 @@ class ShaderProgram {
     this.unifViewProj   = gl.getUniformLocation(this.prog, "u_ViewProj");
     this.unifColor      = gl.getUniformLocation(this.prog, "u_Color");
     this.unifTime        = gl.getUniformLocation(this.prog, "u_Time");
+    this.unifHeight   = gl.getUniformLocation(this.prog, "u_Height");
   }
 
   use() {
@@ -93,6 +96,14 @@ class ShaderProgram {
       gl.uniform1f(this.unifTime, time);
     }
   }
+
+  setHeight(height: number) {
+    this.use();
+    if (this.unifHeight !== -1) {
+      gl.uniform1f(this.unifHeight, height);
+    }
+  }
+
   draw(d: Drawable) {
     this.use();
 
