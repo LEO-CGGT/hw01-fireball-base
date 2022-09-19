@@ -47,6 +47,11 @@ float noise_gen1(vec3 p)
     return fract(sin((dot(p, vec3(127.1, 311.7, 191.999)))) * 43758.5453);
 }
 
+float noise_gen1_4D(vec4 p)
+{
+    return fract(sin((dot(p, vec4(127.1, 311.7, 191.999, 433.7)))) * 43758.5453);
+}
+
 float interpNoise3D(vec3 noise)
 {
     int intX = int(floor(noise.x));
@@ -75,7 +80,62 @@ float interpNoise3D(vec3 noise)
 
     return mix(ii1, ii2, fractZ);
 }
-float fbm(vec3 noise)
+
+float interpNoise4D(vec4 noise)
+{
+    int intX = int(floor(noise.x));
+    float fractX = fract(noise.x);
+    int intY = int(floor(noise.y));
+    float fractY = fract(noise.y);
+    int intZ = int(floor(noise.z));
+    float fractZ = fract(noise.z);
+    int intW = int(floor(noise.w));
+    float fractW = fract(noise.w);
+
+    float v1 = noise_gen1_4D(vec4(intX, intY, intZ, intW));
+    float v2 = noise_gen1_4D(vec4(intX + 1, intY, intZ, intW));
+
+    float v3 = noise_gen1_4D(vec4(intX, intY + 1, intZ, intW));
+    float v4 = noise_gen1_4D(vec4(intX + 1, intY + 1, intZ, intW));
+
+    float v5 = noise_gen1_4D(vec4(intX, intY, intZ + 1, intW));
+    float v6 = noise_gen1_4D(vec4(intX+1, intY, intZ + 1, intW));
+    
+    float v7 = noise_gen1_4D(vec4(intX, intY + 1, intZ + 1, intW));
+    float v8 = noise_gen1_4D(vec4(intX+1, intY+1, intZ + 1, intW));
+    
+    float v9 = noise_gen1_4D(vec4(intX, intY, intZ, intW + 1));
+    float v10 = noise_gen1_4D(vec4(intX + 1, intY, intZ, intW + 1));
+    float v11 = noise_gen1_4D(vec4(intX, intY + 1, intZ, intW + 1));
+    float v12 = noise_gen1_4D(vec4(intX + 1, intY + 1, intZ, intW + 1));
+    float v13 = noise_gen1_4D(vec4(intX, intY, intZ + 1, intW + 1));
+    float v14 = noise_gen1_4D(vec4(intX+1, intY, intZ + 1, intW + 1));
+    float v15 = noise_gen1_4D(vec4(intX, intY + 1, intZ + 1, intW + 1));
+    float v16 = noise_gen1_4D(vec4(intX+1, intY+1, intZ + 1, intW + 1));
+
+    float i1 = mix(v1, v2, fractX);
+    float i2 = mix(v3, v4, fractX);
+    float i3 = mix(v5, v6, fractX);
+    float i4 = mix(v7, v8, fractX);
+    
+    float i5 = mix(v9, v10, fractX);
+    float i6 = mix(v11, v12, fractX);
+    float i7 = mix(v13, v14, fractX);
+    float i8 = mix(v15, v16, fractX);
+
+    float ii1 = mix(i1, i2, fractY);
+    float ii2 = mix(i3, i4, fractY);
+    float ii3 = mix(i5, i6, fractY);
+    float ii4 = mix(i7, i8, fractY);
+
+    float iii1 = mix(ii1, ii2, fractZ);
+    float iii2 = mix(ii3, ii4, fractZ);
+
+    return mix(iii1, iii2, fractW);
+
+}
+
+float fbm3D(vec3 noise)
 {
     float total = 0.0f;
     float persistence = 0.5f;
@@ -86,6 +146,22 @@ float fbm(vec3 noise)
     for (int i=1; i<=octaves; i++)
     {
         total += interpNoise3D(noise * freq) * amp;
+        freq *= 2.0f;
+        amp *= persistence;
+    }
+    return total;
+}
+float fbm4D(vec4 noise)
+{
+    float total = 0.0f;
+    float persistence = 0.5f;
+    int octaves = 8;
+    float freq = 2.0f;
+    float amp = 0.5f;
+    
+    for (int i=1; i<=octaves; i++)
+    {
+        total += interpNoise4D(noise * freq) * amp;
         freq *= 2.0f;
         amp *= persistence;
     }
@@ -112,11 +188,12 @@ float WorleyNoise(vec3 p)
             for(int x = -1; x <= 1; ++x) 
             {
                 vec3 neighbor = vec3(float(x), float(y), float(z)); // Direction in which neighbor cell lies
-                vec3 point = random3(pInt + neighbor); // Get the Voronoi centerpoint for the neighboring cell
+                //vec3 point = random3(pInt + neighbor); // Get the Voronoi centerpoint for the neighboring cell
                 
-                point = 0.5 + 0.5*sin(u_Time / 1000.0 + 6.2831*point);
+                //point = 0.5 + 0.5*sin(u_Time / 1000.0 + 6.2831*point);
                 
-                vec3 diff = neighbor + point - pFract; // Distance between fragment coord and neighbor’s Voronoi point
+                //vec3 diff = neighbor + point - pFract; // Distance between fragment coord and neighbor’s Voronoi point
+                vec3 diff = neighbor - pFract; // Distance between fragment coord and neighbor’s Voronoi point
                 float dist = length(diff);
                 minDist = min(minDist, dist);
             }
@@ -124,18 +201,35 @@ float WorleyNoise(vec3 p)
     }
     return minDist;
 }
-
+// WorleyNoise function copied from the lecture notes
+float WorleyNoise4D(vec4 p) 
+{
+    vec4 pInt = floor(p);
+    vec4 pFract = fract(p);
+    float minDist = 1.0; // Minimum distance initialized to max.
+    for (int w = -1; w<=1;++w)
+    {
+        for (int z = -1; z <= 1; ++z)
+        {
+            for(int y = -1; y <= 1; ++y) 
+            {
+                for(int x = -1; x <= 1; ++x) 
+                {
+                    vec4 neighbor = vec4(float(x), float(y), float(z), float(w)); // Direction in which neighbor cell lies
+                    vec4 diff = neighbor - pFract; // Distance between fragment coord and neighbor’s Voronoi point
+                    float dist = length(diff);
+                    minDist = min(minDist, dist);
+                }
+            }
+        }
+    }
+    return minDist;
+}
 
 // https://thebookofshaders.com/13
 float fbmWorley(vec3 p, float freq) {
     float sum = 0.0;
     float persistence = 0.5;
-
-    vec3 shift = vec3(1000.0);
-    float time = u_Time / 1.0;
-    mat3 rot = mat3(cos(time), sin(time),0.0, 
-                    -sin(time), cos(time), 0.0,
-                    0.0, 0.0, 1.0);
 
     for(int i = 0; i < 4; ++i) {
         sum += persistence * WorleyNoise(p * freq);
@@ -145,6 +239,20 @@ float fbmWorley(vec3 p, float freq) {
     }
     return sum;
 }
+
+float fbmWorley4D(vec4 p, float freq) {
+    float sum = 0.0;
+    float persistence = 0.5;
+    for(int i = 0; i < 4; ++i) {
+        sum += persistence * WorleyNoise4D(p * freq);
+        //p = rot * p + shift;
+        persistence *= 0.5;
+        freq *= 2.0;
+    }
+    return sum;
+}
+
+
 
 float sinSmooth(float x)
 {
@@ -176,12 +284,23 @@ void main()
     float phi = atan(length(modelposition.xy) / modelposition.z);
 
 //    float worley = fbmWorley(vs_Pos.xyz, 1.0);
-    vec3 temp_pos = vs_Pos.xyz + u_Time / 1000.0;
-//    float temp_scale = fbmWorley(vs_Pos.xyz, 1.0) * sin(u_Time / 1000.0);
-    float temp_scale = fbmWorley(vs_Pos.xyz, 1.0);
-    float worley = fbm(temp_scale + temp_pos);
-//    float worley = fbm(fbm(fbmWorley(vs_Pos.xyz, 1.0) + vs_Pos.xyz) + vs_Pos.xyz);
+//    vec3 temp_pos = vs_Pos.xyz + u_Time / 1000.0;
+    vec3 temp_pos = vs_Pos.xyz;
 
+//    float temp_scale = fbmWorley(vs_Pos.xyz, 1.0) * sin(u_Time / 1000.0);
+ //   float temp_scale = fbmWorley(vs_Pos.xyz, 1.0);
+//    float worley = fbm3D(temp_scale + temp_pos);
+//float worley = fbm4D(vec4(temp_scale + temp_pos, u_Time/1000.0));
+   // float worley = fbm3D(fbm3D(fbmWorley(vs_Pos.xyz, 1.0) + vs_Pos.xyz) + vs_Pos.xyz);
+
+    //float worley = fbm3D(fbm3D(fbmWorley4D(vec4(vs_Pos.xyz,u_Time/10000.0), 1.0)  + vs_Pos.xyz) + vs_Pos.xyz);
+    //float worley = WorleyNoise4D(vec4(vs_Pos.xyz, u_Time/10000.0));
+    float worley = WorleyNoise(vs_Pos.xyz);
+
+    //worley = fbm3D(fbm4D(vec4(vs_Pos.xyz, u_Time/10000.0 + WorleyNoise(modelposition.xyz))) + vs_Pos.xyz);
+    float fbm_worley = fbmWorley(vs_Pos.xyz, 1.0);
+    float fbm_layer1 = fbm3D(fbm_worley + vs_Pos.xyz);
+    worley = fbm4D(vec4(vs_Pos.xyz + fbm_layer1, u_Time/1000.0 + WorleyNoise(modelposition.xyz) ));
 
     worley = sinSmooth(worley);
 

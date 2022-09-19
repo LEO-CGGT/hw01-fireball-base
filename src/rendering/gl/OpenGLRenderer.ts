@@ -33,8 +33,8 @@ class OpenGLRenderer {
     prog.setModelMatrix(model);
     prog.setViewProjMatrix(viewProj);
     prog.setGeometryColor(color);
-    prog.setTime(Date.now() - this.startTime) 
-    prog.setHeight(height)
+    prog.setTime(Date.now() - this.startTime);
+    prog.setHeight(height);
 
     for (let drawable of drawables) {
       prog.draw(drawable);
