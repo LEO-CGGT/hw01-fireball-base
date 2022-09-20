@@ -117,14 +117,13 @@ void main()
                                                             //lit by our point light are not completely black.
 
         // Compute final shaded color
-        vec3 yellow = vec3(244.0,231.0,28.0);
-        vec3 whiteYellow = vec3(254.0, 251.0, 206.0);
+        vec3 col = u_Color.rgb;
+        vec3 yellow = vec3(col.r,231.0,0.0);
+        vec3 white = vec3(255.0, col.r, 206.0);
+        vec3 red = vec3(col.r,col.r/3.0,0.0);
 
-        vec3 red = vec3(240.0,51.0,3.0);
-        vec3 flameRed = vec3(236.0, 29.0, 32.0);
-
-        vec3 finalYellow = mix(yellow,whiteYellow, bias(0.3,fbm3D(fs_Pos.xyz)));
-        vec3 finalRed = mix(red, flameRed, bias(0.7, fbm3D(fs_Pos.xyz)));
+        vec3 finalYellow = mix(yellow,white, bias(0.4,fbm3D(fs_Pos.xyz)));
+        vec3 finalRed = mix(red, col, bias(0.6, fbm3D(fs_Pos.xyz)));
 
         vec3 color = mix(finalYellow, finalRed, smoothstep(0.0, 1.0, fs_H));
 

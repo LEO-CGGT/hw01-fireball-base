@@ -13,21 +13,27 @@ import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
   tesselations: 5,
-  'Load Scene': loadScene, // A function pointer, essentially
-  R: 1.0,
-  G: 0.0,
-  B: 0.0,
-  A: 1.0,
-  'Lambert': changeToLambert,
-  'Perlin': changeToPerlin,
-  'Worley': changeToWorley,
-  'Custom': changeToCustom,
-  'Regular': changeToRegular,
-  'Expand': changeToExpand,
-  'Collapse': changeToCollapse,
-  'Distort':changeToDistort,
-  'Load Fireball':loadFireBall,
-  Height: 1.0,
+  // 'Load Scene': loadScene, // A function pointer, essentially
+  // R: 1.0,
+  // G: 0.0,
+  // B: 0.0,
+  // A: 1.0,
+  // 'Lambert': changeToLambert,
+  // 'Perlin': changeToPerlin,
+  // 'Worley': changeToWorley,
+  // 'Custom': changeToCustom,
+  // 'Regular': changeToRegular,
+  // 'Expand': changeToExpand,
+  // 'Collapse': changeToCollapse,
+  // 'Distort':changeToDistort,
+  // 'Load Fireball':loadFireBall,
+  'Reset Fireball': resetFireBall,
+  height: 2.0,
+  time: 1.0,
+};
+
+var palette = {
+  color: [255.0, 0.0, 0.0, 1.0],
 };
 
 let icosphere: Icosphere;
@@ -35,47 +41,52 @@ let square: Square;
 let cube: Cube;
 let prevTesselations: number = 5;
 
-var vertShader = require('./shaders/lambert-vert.glsl');
-var fragShader = require('./shaders/lambert-frag.glsl');
-function changeToLambert()
+//var vertShader = require('./shaders/lambert-vert.glsl');
+//var fragShader = require('./shaders/lambert-frag.glsl');
+// function changeToLambert()
+// {
+//   fragShader = require('./shaders/lambert-frag.glsl');
+// }
+// function changeToPerlin()
+// {
+//   fragShader = require('./shaders/perlin-frag.glsl');
+// }
+// function changeToWorley()
+// {
+//   fragShader = require('./shaders/worley-frag.glsl');
+// }
+// function changeToCustom()
+// {
+//   fragShader = require('./shaders/custom-frag.glsl');
+// }
+// function changeToRegular()
+// {
+//   vertShader = require('./shaders/lambert-vert.glsl');
+// }
+// function changeToExpand()
+// {
+//   vertShader = require('./shaders/expand-vert.glsl');
+// }
+// function changeToCollapse()
+// {
+//   vertShader = require('./shaders/collapse-vert.glsl');
+// }
+// function changeToDistort()
+// {
+//   vertShader = require('./shaders/distort-vert.glsl');
+// }
+// function loadFireBall()
+// {
+//   vertShader = require('./shaders/fireball-vert.glsl');
+//   fragShader = require('./shaders/fireball-frag.glsl');
+// }
+function resetFireBall()
 {
-  fragShader = require('./shaders/lambert-frag.glsl');
+  controls.height = 2.0;
+  palette.color = [255.0, 0.0, 0.0, 1.0];
 }
-function changeToPerlin()
-{
-  fragShader = require('./shaders/perlin-frag.glsl');
-}
-function changeToWorley()
-{
-  fragShader = require('./shaders/worley-frag.glsl');
-}
-function changeToCustom()
-{
-  fragShader = require('./shaders/custom-frag.glsl');
-}
-function changeToRegular()
-{
-  vertShader = require('./shaders/lambert-vert.glsl');
-}
-function changeToExpand()
-{
-  vertShader = require('./shaders/expand-vert.glsl');
-}
-function changeToCollapse()
-{
-  vertShader = require('./shaders/collapse-vert.glsl');
-}
-function changeToDistort()
-{
-  vertShader = require('./shaders/distort-vert.glsl');
-}
-function loadFireBall()
-{
-  vertShader = require('./shaders/fireball-vert.glsl');
-  fragShader = require('./shaders/fireball-frag.glsl');
-}
-var prevFragShader = fragShader;
-var prevVertShader = vertShader;
+//var prevFragShader = fragShader;
+//var prevVertShader = vertShader;
 
 
 function loadScene() {
@@ -99,26 +110,28 @@ function main() {
   // Add controls to the gui
   const gui = new DAT.GUI();
   gui.add(controls, 'tesselations', 0, 8).step(1);
-  gui.add(controls, 'Load Scene');
-  var colorGUI = gui.addFolder('Colors');
-  colorGUI.add(controls, 'R', 0, 1).step(0.01);
-  colorGUI.add(controls, 'G', 0, 1).step(0.01);
-  colorGUI.add(controls, 'B', 0, 1).step(0.01);
-  colorGUI.add(controls, 'A', 0, 1).step(0.01);
-  var fragShaderGUI = gui.addFolder('Frag Shaders');
-  fragShaderGUI.add(controls, 'Lambert');
-  fragShaderGUI.add(controls, 'Perlin');
-  fragShaderGUI.add(controls, 'Worley');
-  fragShaderGUI.add(controls, 'Custom');
-  var vertShaderGUI = gui.addFolder('Vert Shaders');
-  vertShaderGUI.add(controls, 'Regular');
-  vertShaderGUI.add(controls, 'Expand');
-  vertShaderGUI.add(controls, 'Collapse');
-  vertShaderGUI.add(controls, 'Distort');
+  // gui.add(controls, 'Load Scene');
+  // var colorGUI = gui.addFolder('Colors');
+  // colorGUI.add(controls, 'R', 0, 1).step(0.01);
+  // colorGUI.add(controls, 'G', 0, 1).step(0.01);
+  // colorGUI.add(controls, 'B', 0, 1).step(0.01);
+  // colorGUI.add(controls, 'A', 0, 1).step(0.01);
+  // var fragShaderGUI = gui.addFolder('Frag Shaders');
+  // fragShaderGUI.add(controls, 'Lambert');
+  // fragShaderGUI.add(controls, 'Perlin');
+  // fragShaderGUI.add(controls, 'Worley');
+  // fragShaderGUI.add(controls, 'Custom');
+  // var vertShaderGUI = gui.addFolder('Vert Shaders');
+  // vertShaderGUI.add(controls, 'Regular');
+  // vertShaderGUI.add(controls, 'Expand');
+  // vertShaderGUI.add(controls, 'Collapse');
+  // vertShaderGUI.add(controls, 'Distort');
   
-  var fireballGUI = gui.addFolder('Fireball');
-  fireballGUI.add(controls, 'Load Fireball');
-  fireballGUI.add(controls, 'Height', 0, 10).step(0.1);
+  //var fireballGUI = gui.addFolder('Fireball');
+  gui.add(controls, 'Reset Fireball');
+  gui.add(controls, 'height', 0, 10).step(0.1).name("Flame Height");
+  gui.addColor(palette, 'color').name("Flame Color");
+  gui.add(controls,'time',0, 2).step(0.1).name("Movement Speed");
 
 
   // get canvas and webgl context
@@ -142,10 +155,10 @@ function main() {
   renderer.setClearColor(0.2, 0.2, 0.2, 1);
   gl.enable(gl.DEPTH_TEST);
   gl.depthFunc(gl.LEQUAL);
-  const lambert = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag.glsl')),
-  ]);
+  // const lambert = new ShaderProgram([
+  //   new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.glsl')),
+  //   new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag.glsl')),
+  // ]);
   const fireball = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/fireball-vert.glsl')),
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/fireball-frag.glsl')),
@@ -173,18 +186,18 @@ function main() {
     }
 
     var newShader = fireball;
-    if (prevFragShader != fragShader || prevVertShader != vertShader)
-    {
-        newShader = new ShaderProgram([
-        new Shader(gl.VERTEX_SHADER, vertShader),
-        new Shader(gl.FRAGMENT_SHADER, fragShader),
+    // if (prevFragShader != fragShader || prevVertShader != vertShader)
+    // {
+    //     newShader = new ShaderProgram([
+    //     new Shader(gl.VERTEX_SHADER, vertShader),
+    //     new Shader(gl.FRAGMENT_SHADER, fragShader),
     
-      ]);
-    }
+    //   ]);
+    // }
     gl.disable(gl.DEPTH_TEST);
-    renderer.render(backgroundCamera, background, [square], controls.R, controls.G, controls.B, controls.A, controls.Height);
+    renderer.render(backgroundCamera, background, [square], palette.color, controls.height, controls.time);
     gl.enable(gl.DEPTH_TEST);
-    renderer.render(camera, newShader, objToRender, controls.R, controls.G, controls.B, controls.A, controls.Height);
+    renderer.render(camera, newShader, objToRender, palette.color, controls.height, controls.time);
 
     stats.end();
 

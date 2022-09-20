@@ -234,7 +234,7 @@ float fbmWorley(vec3 p, float freq) {
     float sum = 0.0;
     float persistence = 0.5;
 
-    for(int i = 0; i < 4; ++i) {
+    for(int i = 0; i < 8; ++i) {
         sum += persistence * WorleyNoise(p * freq);
         //p = rot * p + shift;
         persistence *= 0.5;
@@ -246,9 +246,8 @@ float fbmWorley(vec3 p, float freq) {
 float fbmWorley4D(vec4 p, float freq) {
     float sum = 0.0;
     float persistence = 0.5;
-    for(int i = 0; i < 4; ++i) {
+    for(int i = 0; i < 8; ++i) {
         sum += persistence * WorleyNoise4D(p * freq);
-        //p = rot * p + shift;
         persistence *= 0.5;
         freq *= 2.0;
     }
@@ -306,15 +305,14 @@ void main()
     float fbm_worley = fbmWorley(1.0 * vs_Pos.xyz, 1.0);
     h = sinSmooth(fbm_worley);
 
-    float fbm_layer1 = fbm3D(h + vs_Pos.xyz);
-    h = fbm4D(vec4(vs_Pos.xyz + fbm_layer1, u_Time/500.0 + WorleyNoise(modelposition.xyz) ));
+    for (int i=0; i<1;i++)
+    {
+         h = fbm4D(vec4(vs_Pos.xyz + h, u_Time/500.0 + WorleyNoise(modelposition.xyz) ));
+    }
 
     h = gain(0.6, h);
 
     modelposition = modelposition + fs_Nor * 0.5 * h * u_Height;
-
-    //modelposition = rotY(modelposition, -u_Time / 2000.0);
-
     fs_H = h;
 
     fs_Pos = modelposition;

@@ -160,17 +160,20 @@ float bias(float b, float t)
 
 void main()
 {
-    vec2 uv = gl_FragCoord.xy/u_CanvasSize.xy*3.;
-    float time = u_Time / 1000.0;
+    vec2 uv = gl_FragCoord.xy/u_CanvasSize.xy * 3.0;
+    float time = u_Time / 2000.0;
 
-    vec3 eggplant = vec3(83.0,59.0,77.0) / 255.0;
-    vec3 xiketic = vec3(5.0, 5.0, 23.0) / 255.0;
+    vec3 col = vec3(83.0, u_Color.r * 2.0 / 3.0, 222.0) / 255.0;
+    vec3 xiketic = vec3(5.0, 5.0, u_Color.r / 10.0) / 255.0;
 
     float fbm_worley = fbmWorley(1.0 * uv, 1.0);
     float c = sinSmooth(fbm_worley);
-    float fbm_layer1 = fbm(c + uv);
-    c = fbm3D(vec3(uv + fbm_layer1, u_Time/2000.0 + WorleyNoise(uv)));
 
-    vec3 color = mix(eggplant, xiketic, bias(0.7, c));
+    for (int i=0; i<1;i++)
+    {
+         c = fbm3D(vec3(uv + c, time + WorleyNoise(uv)));
+    }
+
+    vec3 color = mix(col, xiketic, bias(0.7, c));
     out_Col = vec4(color,1.);
 }
