@@ -106,9 +106,11 @@ void main()
         // Calculate the diffuse term for Lambert shading
         float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
         // Avoid negative lighting values
-        // diffuseTerm = clamp(diffuseTerm, 0, 1);
+        diffuseTerm = clamp(diffuseTerm, 0.0, 1.0);
 
         float ambientTerm = 0.2;
+        //vec4 view_vec = fs_CameraPos- fs_Pos;   // the view vector
+        //vec4 H = (normalize(view_vec) + normalize(fs_LightVec)) / 2.0;  // compute the H vector
 
         float lightIntensity = diffuseTerm + ambientTerm;   //Add a small float value to the color multiplier
                                                             //to simulate ambient lighting. This ensures that faces that are not
@@ -121,10 +123,10 @@ void main()
         vec3 red = vec3(240.0,51.0,3.0);
         vec3 flameRed = vec3(236.0, 29.0, 32.0);
 
-        vec3 finalYellow = mix(yellow,whiteYellow, bias(0.2,fbm3D(fs_Pos.xyz)));
-        vec3 finalRed = mix(red, flameRed, bias(0.8, fbm3D(fs_Pos.xyz)));
+        vec3 finalYellow = mix(yellow,whiteYellow, bias(0.3,fbm3D(fs_Pos.xyz)));
+        vec3 finalRed = mix(red, flameRed, bias(0.7, fbm3D(fs_Pos.xyz)));
 
         vec3 color = mix(finalYellow, finalRed, smoothstep(0.0, 1.0, fs_H));
 
-        out_Col = vec4(color.rgb / 255.0, 1.0);
+        out_Col = vec4(color.rgb  / 255.0, 1.0);
 }

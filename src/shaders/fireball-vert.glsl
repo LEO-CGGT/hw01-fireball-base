@@ -42,6 +42,9 @@ out float fs_H; // displacement
 
 const vec4 lightPos = vec4(5, 5, 3, 1); //The position of our virtual light, which is used to compute the shading of
                                         //the geometry in the fragment shader.
+float fade(float t){
+	return ((6.0*t - 15.0)*t + 10.0)*t*t*t;
+}
 float noise_gen1(vec3 p)
 {
     return fract(sin((dot(p, vec3(127.1, 311.7, 191.999)))) * 43758.5453);
@@ -272,6 +275,11 @@ float gain(float g, float t)
     return 1.0-bias(1.0-g, 2.0-2.0*t) / 2.0;
 }
 
+vec4 rotY(vec4 p, float a)
+{
+    mat4 rotYMat = mat4(cos(a), 0.0, -sin(a),0.0, 0.0, 1.0, 0.0,0.0, sin(a),0.0, cos(a),0.0, 0.0,0.0,0.0,1.0);
+    return rotYMat * p;
+}
 
 void main()
 {
@@ -303,7 +311,9 @@ void main()
 
     h = gain(0.6, h);
 
-    modelposition = modelposition + fs_Nor * 1.0 * h * u_Height;
+    modelposition = modelposition + fs_Nor * 0.5 * h * u_Height;
+
+    //modelposition = rotY(modelposition, -u_Time / 2000.0);
 
     fs_H = h;
 

@@ -135,17 +135,27 @@ function main() {
   loadScene();
 
   const camera = new Camera(vec3.fromValues(0, 0, 5), vec3.fromValues(0, 0, 0));
+  const backgroundCamera = new Camera(vec3.fromValues(0, 0, -1), vec3.fromValues(0, 0, 0));
+
 
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.2, 0.2, 0.2, 1);
   gl.enable(gl.DEPTH_TEST);
   gl.depthFunc(gl.LEQUAL);
-
   const lambert = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.glsl')),
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag.glsl')),
   ]);
+  const fireball = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/fireball-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/fireball-frag.glsl')),
+  ]);
+  const background = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/background-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/background-frag.glsl')),
+  ]);
 
+  const objToRender = [icosphere];
 
   // This function will be called every frame
   function tick() {
@@ -153,6 +163,8 @@ function main() {
     stats.begin();
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
     if(controls.tesselations != prevTesselations)
     {
       prevTesselations = controls.tesselations;
@@ -160,7 +172,7 @@ function main() {
       icosphere.create();
     }
 
-    var newShader = lambert;
+    var newShader = fireball;
     if (prevFragShader != fragShader || prevVertShader != vertShader)
     {
         newShader = new ShaderProgram([
@@ -169,12 +181,11 @@ function main() {
     
       ]);
     }
+    gl.disable(gl.DEPTH_TEST);
+    renderer.render(backgroundCamera, background, [square], controls.R, controls.G, controls.B, controls.A, controls.Height);
+    gl.enable(gl.DEPTH_TEST);
+    renderer.render(camera, newShader, objToRender, controls.R, controls.G, controls.B, controls.A, controls.Height);
 
-    renderer.render(camera, newShader, [
-      icosphere,
-      // square,
-       //cube,
-    ], controls.R, controls.G, controls.B, controls.A, controls.Height);
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame

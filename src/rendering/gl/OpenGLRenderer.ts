@@ -35,6 +35,8 @@ class OpenGLRenderer {
     prog.setGeometryColor(color);
     prog.setTime(Date.now() - this.startTime);
     prog.setHeight(height);
+    prog.setCanvasSize(this.canvas.width, this.canvas.height);
+    //console.log(this.canvas.width, this.canvas.height);
 
     for (let drawable of drawables) {
       prog.draw(drawable);
