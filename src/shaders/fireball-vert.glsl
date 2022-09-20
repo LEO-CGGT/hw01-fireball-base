@@ -259,14 +259,25 @@ float sinSmooth(float x)
     return sin(x * 3.14159 * 0.5);
 }
 
+float bias(float b, float t)
+{
+    return pow(t, log(b) / log(0.5f));
+}
+
+float gain(float g, float t)
+{
+    if(t<0.5)
+    return bias(1.0-g, 2.0*t) /2.0;
+    else
+    return 1.0-bias(1.0-g, 2.0-2.0*t) / 2.0;
+}
+
+
 void main()
 {
     float radius = 1.0f;
 
     fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
-
-    //fs_Pos = vs_Pos;
-
     float h = 0.0;      // displacement amount
 
 
@@ -283,32 +294,14 @@ void main()
     float theta = atan(modelposition.y / modelposition.x);
     float phi = atan(length(modelposition.xy) / modelposition.z);
 
-//    float worley = fbmWorley(vs_Pos.xyz, 1.0);
-//    vec3 temp_pos = vs_Pos.xyz + u_Time / 1000.0;
-    vec3 temp_pos = vs_Pos.xyz;
 
-//    float temp_scale = fbmWorley(vs_Pos.xyz, 1.0) * sin(u_Time / 1000.0);
- //   float temp_scale = fbmWorley(vs_Pos.xyz, 1.0);
-//    float worley = fbm3D(temp_scale + temp_pos);
-//float worley = fbm4D(vec4(temp_scale + temp_pos, u_Time/1000.0));
-   // float worley = fbm3D(fbm3D(fbmWorley(vs_Pos.xyz, 1.0) + vs_Pos.xyz) + vs_Pos.xyz);
+    float fbm_worley = fbmWorley(1.0 * vs_Pos.xyz, 1.0);
+    h = sinSmooth(fbm_worley);
 
-    //float worley = fbm3D(fbm3D(fbmWorley4D(vec4(vs_Pos.xyz,u_Time/10000.0), 1.0)  + vs_Pos.xyz) + vs_Pos.xyz);
-    //float worley = WorleyNoise4D(vec4(vs_Pos.xyz, u_Time/10000.0));
-    float worley = WorleyNoise(vs_Pos.xyz);
+    float fbm_layer1 = fbm3D(h + vs_Pos.xyz);
+    h = fbm4D(vec4(vs_Pos.xyz + fbm_layer1, u_Time/500.0 + WorleyNoise(modelposition.xyz) ));
 
-    //worley = fbm3D(fbm4D(vec4(vs_Pos.xyz, u_Time/10000.0 + WorleyNoise(modelposition.xyz))) + vs_Pos.xyz);
-    float fbm_worley = fbmWorley(vs_Pos.xyz, 1.0);
-    float fbm_layer1 = fbm3D(fbm_worley + vs_Pos.xyz);
-    worley = fbm4D(vec4(vs_Pos.xyz + fbm_layer1, u_Time/1000.0 + WorleyNoise(modelposition.xyz) ));
-
-    worley = sinSmooth(worley);
-
-    h = 1.0 * worley;
-    //h += 2.0 * sin(fbmWorley(vs_Pos.yzx, 2.0));
-    //h += 1.0 * sin(fbmWorley(vs_Pos.zxy, 4.0));
-
-    //h +=  0.5 * fbm1;
+    h = gain(0.6, h);
 
     modelposition = modelposition + fs_Nor * 1.0 * h * u_Height;
 
