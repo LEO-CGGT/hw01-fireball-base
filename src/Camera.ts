@@ -36,6 +36,18 @@ class Camera {
     vec3.add(this.target, this.position, this.direction);
     mat4.lookAt(this.viewMatrix, this.controls.eye, this.controls.center, this.controls.up);
   }
+  reset()
+  {
+    this.controls = CameraControls(document.getElementById('canvas'), {
+      eye: vec3.fromValues(0, 0, 5),
+      center: vec3.fromValues(0, 0, 0),
+    });
+    //vec3.add(this.target, this.position, this.direction);
+    //mat4.lookAt(this.viewMatrix, this.controls.eye, this.controls.center, this.controls.up);
+    this.position = vec3.fromValues(0, 0, 5);
+    this.target = vec3.fromValues(0, 0, 0);
+    mat4.lookAt(this.viewMatrix, vec3.fromValues(0, 0, 5), vec3.fromValues(0, 0, 0), this.controls.up)
+  }
 };
 
 export default Camera;

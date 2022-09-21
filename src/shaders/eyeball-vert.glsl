@@ -314,7 +314,7 @@ void main()
     h = gain(u_Madness / 2.0, h);
 
     //modelpositionZ = modelposition.z;
-    modelposition = modelposition + fs_Nor * 0.4 * h * u_Height;
+    modelposition = modelposition + fs_Nor * 0.3 * h * u_Height;
     //modelposition.z = modelpositionZ;
     fs_H = h;
 

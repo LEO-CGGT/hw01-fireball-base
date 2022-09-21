@@ -14,6 +14,7 @@ precision highp float;
 uniform vec4 u_Color; // The color with which to render this instance of geometry.
 
 uniform float u_Height;
+uniform int u_Frenzy;
 
 // These are the interpolated values out of the rasterizer, so you can't know
 // their specific values without knowing the vertices that contributed to them
@@ -130,16 +131,22 @@ void main()
         vec3 red2 = vec3(255.0, 0.0, 0.0);
         vec3 darkRed = vec3(200.0, 0.0, 0.0);
 
-
+        float blendWeight = fs_H;
         //vec3 finalYellow = mix(yellow,white, smoothstep(fbm3D(fs_Pos.xyz)));
         //vec3 finalRed = mix(red, col, bias(0.6, fbm3D(fs_Pos.xyz)));
-        
-        vec3 c1 = mix(white, yellow, bias(0.7, smoothstep(0.0, 1.0, fs_H)));
-        vec3 c2 = mix(c1, orange1, bias(0.85, smoothstep(0.0, 1.0, fs_H)));
-        vec3 c3 = mix(c2, orange2, bias(0.5, smoothstep(0.0, 1.0, fs_H)));
 
-        vec3 c4 = mix(c3, red, bias(0.15, smoothstep(0.0, 1.0, fs_H)));
-        vec3 c5 = mix(c4, darkRed, bias(0.3, smoothstep(0.0, 1.0, fs_H)));
+        // For the eye
+        // if (u_Frenzy > 0 && fs_Pos.z > 0.55)
+        // {
+        //     blendWeight = mix(0.0, 0.55, (1.0 - fs_Pos.z));
+        // }
+        
+        vec3 c1 = mix(white, yellow, bias(0.7, smoothstep(0.0, 1.0, blendWeight)));
+        vec3 c2 = mix(c1, orange1, bias(0.85, smoothstep(0.0, 1.0, blendWeight)));
+        vec3 c3 = mix(c2, orange2, bias(0.5, smoothstep(0.0, 1.0, blendWeight)));
+
+        vec3 c4 = mix(c3, red, bias(0.15, smoothstep(0.0, 1.0, blendWeight)));
+        vec3 c5 = mix(c4, darkRed, bias(0.3, smoothstep(0.0, 1.0, blendWeight)));
 
         //vec3 color = mix(finalYellow, finalRed, fs_H);
         //vec3 color = mix(finalYellow, finalRed, smoothstep(0.0, 1.0, fs_H));

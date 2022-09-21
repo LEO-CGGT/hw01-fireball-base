@@ -179,8 +179,8 @@ void main()
          c = fbm3D(vec3(uv + c, time + WorleyNoise(uv)));
     }
 
-    vec3 col1 = mix(darkGreen, orange, bias(0.02, u_Madness)); 
-    vec3 col2 = mix(xiketic, darkRed, bias(0.02, u_Madness)); 
+    vec3 col1 = mix(darkGreen, orange, bias(0.04, u_Madness)); 
+    vec3 col2 = mix(xiketic, darkRed, bias(0.04, u_Madness)); 
 
 
     vec3 color = mix(col1, xiketic, c);

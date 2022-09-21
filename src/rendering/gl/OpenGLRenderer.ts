@@ -24,7 +24,7 @@ class OpenGLRenderer {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   }
 
-  render(camera: Camera, prog: ShaderProgram, drawables: Array<Drawable>, height: number, timeMult: number, madness: number) {
+  render(camera: Camera, prog: ShaderProgram, drawables: Array<Drawable>, height: number, timeMult: number, madness: number, frenzy: number) {
     let model = mat4.create();
     let viewProj = mat4.create();
 
@@ -37,7 +37,7 @@ class OpenGLRenderer {
     prog.setHeight(height);
     prog.setCanvasSize(this.canvas.width, this.canvas.height);
     prog.setMadness(madness);
-
+    prog.setFrenzy(frenzy);
 
     this.prevTime = Date.now();
     for (let drawable of drawables) {

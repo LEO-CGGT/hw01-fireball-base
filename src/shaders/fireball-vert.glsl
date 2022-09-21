@@ -27,6 +27,7 @@ uniform float u_Time;
 
 uniform float u_Height;
 uniform float u_Madness;
+uniform int u_Frenzy;
 
 in vec4 vs_Pos;             // The array of vertex positions passed to the shader
 
@@ -288,7 +289,6 @@ void main()
     fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
     float h = 0.0;      // displacement amount
 
-
     mat3 invTranspose = mat3(u_ModelInvTr);
     fs_Nor = vec4(invTranspose * vec3(vs_Nor), 0);          // Pass the vertex normals to the fragment shader for interpolation.
                                                             // Transform the geometry's normals by the inverse transpose of the
@@ -308,19 +308,31 @@ void main()
 
     for (int i=0; i<1;i++)
     {
-         h = fbm4D(vec4(vs_Pos.xyz + h, u_Time/500.0 + WorleyNoise(modelposition.xyz) ));
+         h = fbm4D(vec4(vs_Pos.xyz + h, u_Time/500.0 + WorleyNoise(vs_Pos.xyz) ));
     }
 
     h = gain(u_Madness, h);
 
+    // For the eye
+    if (u_Frenzy > 0 && fs_Pos.z > 0.50)
+    {
+        h *= 0.7;
+    }
+
+
     modelposition = modelposition + fs_Nor * 0.5 * h * u_Height;
+    
     fs_H = h;
 
+    if (u_Frenzy > 0)
+    {
+        modelposition.z /= 2.0;
+        fs_H = mix(0.0, 0.6, (1.0 - modelposition.z));
+    }
+
     fs_Pos = modelposition;
-    
+
     fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies
     gl_Position = u_ViewProj * modelposition;// gl_Position is a built-in variable of OpenGL which is
                                              // used to render the final positions of the geometry's vertices
-
-
 }

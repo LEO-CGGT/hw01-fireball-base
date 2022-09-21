@@ -11,21 +11,21 @@ import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 
 import audioFile from './assets/Elden Ring.mp3';
 
-
+let audioContext : AudioContext;
+let audioElement: HTMLAudioElement;
+let frenzyMode: number = 0;
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
-  tesselations: 5,
+  tesselations: 6,
   'Reset Fireball': resetFireBall,
   height: 2.0,
   time: 0.1,
   'Play/Pause Music': playMusic,
   madness: 0.6,
+  'The Flame of Frenzy': enableFrenzy,
 };
 
-var palette = {
-  color: [200.0, 0.0, 0.0, 1.0],
-};
 let icosphere: Icosphere;
 let icosphere2: Icosphere;
 let square: Square;
@@ -33,10 +33,11 @@ let prevTesselations: number = 5;
 
 function resetFireBall()
 {
+  controls.tesselations = 5;
   controls.height = 2.0;
-  palette.color = [200.0, 0.0, 0.0, 1.0];
   controls.time = 0.1;
   controls.madness = 0.6;
+  frenzyMode = 0;
 }
 
 function loadScene() {
@@ -49,9 +50,13 @@ function loadScene() {
 
 }
 
-
-let audioContext : AudioContext;
-let audioElement: HTMLAudioElement;
+function enableFrenzy()
+{
+  if (frenzyMode == 0)
+    frenzyMode = 1;
+  else
+    frenzyMode = 0; 
+}
 
 
 function playMusic() {
@@ -87,12 +92,13 @@ function main() {
 
   // Add controls to the gui
   const gui = new DAT.GUI();
-  gui.add(controls, 'tesselations', 0, 8).step(1);
   gui.add(controls, 'Reset Fireball');
+  gui.add(controls, 'Play/Pause Music');
+  gui.add(controls, 'tesselations', 0, 8).step(1);
   gui.add(controls, 'height', 0, 5).step(0.1).name("Flame Height").listen();
   gui.add(controls,'time',0, 2).step(0.1).name("Movement Speed").listen();
-  gui.add(controls, 'Play/Pause Music');
-  gui.add(controls, 'madness', 0.01, 0.99).step(0.01).name("Madness").listen();
+  gui.add(controls, 'madness', 0.01, 0.90).step(0.01).name("Madness").listen();
+  gui.add(controls, 'The Flame of Frenzy');
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -149,8 +155,11 @@ function main() {
     var time = controls.time + low * 1.0;
     var height = controls.height + high * 8.0;
     var madness = controls.madness + low * 0.01;
-
+    if (frenzyMode == 0)
     camera.update();
+    else
+    camera.reset();
+
     stats.begin();
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
@@ -164,14 +173,16 @@ function main() {
     }
 
     gl.disable(gl.DEPTH_TEST);
-    renderer.render(backgroundCamera, background, [square],  height, time, madness);
+    renderer.render(backgroundCamera, background, [square],  height, time, madness, frenzyMode);
     gl.enable(gl.DEPTH_TEST);
-    renderer.render(camera, fireball, [icosphere],  height, time, madness);
+    renderer.render(camera, fireball, [icosphere],  height, time, madness, frenzyMode);
     
-    // gl.disable(gl.DEPTH_TEST);
-    // renderer.render(camera, flat, [icosphere2],height, time, madness);
-    // gl.enable(gl.DEPTH_TEST);
-
+    if (frenzyMode == 1)
+    {
+      gl.disable(gl.DEPTH_TEST);
+      renderer.render(camera, flat, [icosphere2],height, time, madness, frenzyMode);
+      gl.enable(gl.DEPTH_TEST);
+    }  
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame
