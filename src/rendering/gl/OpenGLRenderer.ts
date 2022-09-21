@@ -24,20 +24,20 @@ class OpenGLRenderer {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   }
 
-  render(camera: Camera, prog: ShaderProgram, drawables: Array<Drawable>, colorVec: Array<number>, height: number, timeMult: number) {
+  render(camera: Camera, prog: ShaderProgram, drawables: Array<Drawable>, height: number, timeMult: number, madness: number) {
     let model = mat4.create();
     let viewProj = mat4.create();
-    let color = vec4.fromValues(colorVec[0], colorVec[1], colorVec[2], colorVec[3] )
 
     mat4.identity(model);
     mat4.multiply(viewProj, camera.projectionMatrix, camera.viewMatrix);
     prog.setModelMatrix(model);
     prog.setViewProjMatrix(viewProj);
-    prog.setGeometryColor(color);
     this.timeCount += timeMult*(Date.now() - this.prevTime);
     prog.setTime( this.timeCount);
     prog.setHeight(height);
     prog.setCanvasSize(this.canvas.width, this.canvas.height);
+    prog.setMadness(madness);
+
 
     this.prevTime = Date.now();
     for (let drawable of drawables) {

@@ -15,6 +15,7 @@ uniform vec4 u_Color; // The color with which to render this instance of geometr
 
 uniform float u_Time; 
 uniform vec2 u_CanvasSize; 
+uniform float u_Madness;
 
 
 // These are the interpolated values out of the rasterizer, so you can't know
@@ -163,8 +164,12 @@ void main()
     vec2 uv = gl_FragCoord.xy/u_CanvasSize.xy * 3.0;
     float time = u_Time / 2000.0;
 
-    vec3 col = vec3(clamp(u_Color.g + 35.0, 35.0, 255.0), u_Color.r / 3.0, 64.0) / 255.0;
-    vec3 xiketic = vec3(5.0, 5.0, u_Color.r / 10.0) / 255.0;
+    vec3 darkGreen = vec3(20.0,64.0,63.0) / 255.0;
+    vec3 xiketic = vec3(5.0, 5.0, 25.0) / 255.0;
+    vec3 darkRed = vec3(212.0, 101.0, 41.0) / 255.0;
+
+    vec3 orange = vec3(235.0, 122.0, 25.0) / 255.0; 
+
 
     float fbm_worley = fbmWorley(1.0 * uv, 1.0);
     float c = sinSmooth(fbm_worley);
@@ -174,6 +179,10 @@ void main()
          c = fbm3D(vec3(uv + c, time + WorleyNoise(uv)));
     }
 
-    vec3 color = mix(col, xiketic, bias(0.7, c));
+    vec3 col1 = mix(darkGreen, orange, bias(0.02, u_Madness)); 
+    vec3 col2 = mix(xiketic, darkRed, bias(0.02, u_Madness)); 
+
+
+    vec3 color = mix(col1, xiketic, c);
     out_Col = vec4(color,1.);
 }

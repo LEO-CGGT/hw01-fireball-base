@@ -34,6 +34,7 @@ class ShaderProgram {
   unifHeight: WebGLUniformLocation;
 
   unifCanvasSize: WebGLUniformLocation;
+  unifMadness: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -56,6 +57,8 @@ class ShaderProgram {
     this.unifTime        = gl.getUniformLocation(this.prog, "u_Time");
     this.unifHeight   = gl.getUniformLocation(this.prog, "u_Height");
     this.unifCanvasSize = gl.getUniformLocation(this.prog, "u_CanvasSize");
+    this.unifMadness = gl.getUniformLocation(this.prog, "u_Madness");
+
   }
 
   use() {
@@ -112,6 +115,13 @@ class ShaderProgram {
     this.use();
     if (this.unifCanvasSize !== -1) {
       gl.uniform2f(this.unifCanvasSize, width, height);
+    }
+  }
+
+  setMadness(madness: number) {
+    this.use();
+    if (this.unifMadness !== -1) {
+      gl.uniform1f(this.unifMadness, madness);
     }
   }
 

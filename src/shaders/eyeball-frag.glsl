@@ -117,33 +117,20 @@ void main()
                                                             //lit by our point light are not completely black.
 
         // Compute final shaded color
-        //vec3 col = u_Color.rgb;
-        
-        //vec3 yellow = vec3(col.r,231.0,0.0);
-        //vec3 white = vec3(255.0, col.r, 206.0);
-        //vec3 red = vec3(col.r,col.r/3.0,0.0);
         vec3 white = vec3(252.0,246.0, 144.0);
         vec3 yellow = vec3(244.0, 211.0, 51.0);
-        vec3 orange1 = vec3(212.0, 101.0, 41.0);
-        vec3 orange2 = vec3(235.0, 122.0, 25.0);
-        vec3 red = vec3(188.0, 61.0, 39.0);
-        vec3 red2 = vec3(255.0, 0.0, 0.0);
-        vec3 darkRed = vec3(200.0, 0.0, 0.0);
+        vec3 xiketic = vec3(5.0, 5.0, 25.0) / 255.0;
+
 
 
         //vec3 finalYellow = mix(yellow,white, smoothstep(fbm3D(fs_Pos.xyz)));
         //vec3 finalRed = mix(red, col, bias(0.6, fbm3D(fs_Pos.xyz)));
         
-        vec3 c1 = mix(white, yellow, bias(0.7, smoothstep(0.0, 1.0, fs_H)));
-        vec3 c2 = mix(c1, orange1, bias(0.85, smoothstep(0.0, 1.0, fs_H)));
-        vec3 c3 = mix(c2, orange2, bias(0.5, smoothstep(0.0, 1.0, fs_H)));
-
-        vec3 c4 = mix(c3, red, bias(0.15, smoothstep(0.0, 1.0, fs_H)));
-        vec3 c5 = mix(c4, darkRed, bias(0.3, smoothstep(0.0, 1.0, fs_H)));
+        vec3 c1 = mix(yellow, xiketic, bias(0.99, smoothstep(0.0, 1.0, fs_H)));
 
         //vec3 color = mix(finalYellow, finalRed, fs_H);
         //vec3 color = mix(finalYellow, finalRed, smoothstep(0.0, 1.0, fs_H));
         //out_Col = vec4(color.rgb  / 255.0, 1.0);
-        out_Col = vec4(c5 / 255.0, 1.0);
+        out_Col = vec4(c1 / 255.0, 1.0);
 
 }   

@@ -308,12 +308,12 @@ void main()
 
     for (int i=0; i<1;i++)
     {
-         h = fbm4D(vec4(vs_Pos.xyz + h, u_Time/500.0 + WorleyNoise(modelposition.xyz) ));
+         h = fbm4D(vec4(vs_Pos.xyz + h, u_Time/1000.0 + WorleyNoise(modelposition.xyz) ));
     }
 
-    h = gain(u_Madness, h);
+    h = gain(u_Madness / 2.0, h);
 
-    modelposition = modelposition + fs_Nor * 0.5 * h * u_Height;
+    modelposition = modelposition + fs_Nor * 0.4 * h * u_Height;
     fs_H = h;
 
     fs_Pos = modelposition;

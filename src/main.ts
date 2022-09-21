@@ -20,31 +20,33 @@ const controls = {
   height: 2.0,
   time: 0.1,
   'Play/Pause Music': playMusic,
+  madness: 0.6,
 };
 
 var palette = {
-  color: [255.0, 0.0, 0.0, 1.0],
+  color: [200.0, 0.0, 0.0, 1.0],
 };
-
 let icosphere: Icosphere;
+let icosphere2: Icosphere;
 let square: Square;
-let cube: Cube;
 let prevTesselations: number = 5;
 
 function resetFireBall()
 {
   controls.height = 2.0;
-  palette.color = [255.0, 0.0, 0.0, 1.0];
-  controls.time = 1.0;
+  palette.color = [200.0, 0.0, 0.0, 1.0];
+  controls.time = 0.1;
+  controls.madness = 0.6;
 }
 
 function loadScene() {
   icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.tesselations);
   icosphere.create();
+  icosphere2 = new Icosphere(vec3.fromValues(0, 0, 0), 0.1, controls.tesselations);
+  icosphere2.create();
   square = new Square(vec3.fromValues(0, 0, 0));
   square.create();
-  cube = new Cube();
-  cube.create();
+
 }
 
 
@@ -61,7 +63,6 @@ function playMusic() {
     audioElement.pause();
   }
 }
-
 
 function main() {
   // Initial display for framerate
@@ -88,10 +89,10 @@ function main() {
   const gui = new DAT.GUI();
   gui.add(controls, 'tesselations', 0, 8).step(1);
   gui.add(controls, 'Reset Fireball');
-  gui.add(controls, 'height', 0, 10).step(0.1).name("Flame Height").listen();
-  gui.addColor(palette, 'color').name("Flame Color").listen();
+  gui.add(controls, 'height', 0, 5).step(0.1).name("Flame Height").listen();
   gui.add(controls,'time',0, 2).step(0.1).name("Movement Speed").listen();
   gui.add(controls, 'Play/Pause Music');
+  gui.add(controls, 'madness', 0.01, 0.99).step(0.01).name("Madness").listen();
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -113,6 +114,10 @@ function main() {
   renderer.setClearColor(0.2, 0.2, 0.2, 1);
   gl.enable(gl.DEPTH_TEST);
   gl.depthFunc(gl.LEQUAL);
+  const flat = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/eyeball-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/eyeball-frag.glsl')),
+  ]);
   const fireball = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/fireball-vert.glsl')),
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/fireball-frag.glsl')),
@@ -130,8 +135,6 @@ function main() {
     let high: number = 0.0;
     for(var i = 0; i < audioAnalyser.frequencyBinCount; i++)
     {
-      //average += dataArray[i]/256.0;
-      //console.log(dataArray);
       if (i <audioAnalyser.frequencyBinCount / 5.0 )
       {
           low += dataArray[i]/256.0;
@@ -143,10 +146,9 @@ function main() {
     }
     low /= dataArray.length / 5.0;
     high /= dataArray.length * 4.0 / 5.0;
-    //console.log(average);
     var time = controls.time + low * 1.0;
-    //controls.time = 0.1 + average * 5.0;
-    var height = controls.height + high * 10.0;
+    var height = controls.height + high * 8.0;
+    var madness = controls.madness + low * 0.01;
 
     camera.update();
     stats.begin();
@@ -162,9 +164,13 @@ function main() {
     }
 
     gl.disable(gl.DEPTH_TEST);
-    renderer.render(backgroundCamera, background, [square], palette.color, height, time);
+    renderer.render(backgroundCamera, background, [square],  height, time, madness);
     gl.enable(gl.DEPTH_TEST);
-    renderer.render(camera, fireball, [icosphere], palette.color, height, time);
+    renderer.render(camera, fireball, [icosphere],  height, time, madness);
+    
+    gl.disable(gl.DEPTH_TEST);
+    renderer.render(camera, flat, [icosphere2],height, time, madness);
+    gl.enable(gl.DEPTH_TEST);
 
     stats.end();
 
