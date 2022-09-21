@@ -10,7 +10,7 @@ import Camera from './Camera';
 import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 
-import audioFile from './assets/Elden_Ring.mp3';
+import audioFile from '/src/assets/Elden_Ring.mp3';
 
 let audioContext : AudioContext;
 let audioElement: HTMLAudioElement;
@@ -27,26 +27,26 @@ const controls = {
   'The Flame of Frenzy': enableFrenzy,
 };
 
-let loader: THREE.AudioLoader = new THREE.AudioLoader();
-let listener: THREE.AudioListener = new THREE.AudioListener();
-let audio: THREE.Audio = new THREE.Audio(listener);
-let fftSize: number = 2048;
-let analyzer: THREE.AudioAnalyser;
-let songData: Uint8Array;
+// let loader: THREE.AudioLoader = new THREE.AudioLoader();
+// let listener: THREE.AudioListener = new THREE.AudioListener();
+// let audio: THREE.Audio = new THREE.Audio(listener);
+// let fftSize: number = 2048;
+// let analyzer: THREE.AudioAnalyser;
+// let songData: Uint8Array;
 
-function loadSong() {
-  if (audio.isPlaying) audio.stop();
+// function loadSong(filename: string) {
+//   if (audio.isPlaying) audio.stop();
 
-  var file = 'src/assets/Elden_Ring.mp3';
-  loader.load(file, function (buffer: any) {
-    audio.setBuffer(buffer);
-    audio.setLoop(true);
-    audio.play();
-  });
+//   var file = 'assets/' + filename + '.mp3';
+//   loader.load(file, function (buffer: any) {
+//     audio.setBuffer(buffer);
+//     audio.setLoop(true);
+//     audio.play();
+//   });
 
-  analyzer = new THREE.AudioAnalyser(audio, fftSize);
-  songData = analyzer.getFrequencyData();
-}
+//   analyzer = new THREE.AudioAnalyser(audio, fftSize);
+//   songData = analyzer.getFrequencyData();
+// }
 
 let icosphere: Icosphere;
 let icosphere2: Icosphere;
@@ -93,14 +93,13 @@ function enableFrenzy()
 
 
 function playMusic() {
-  // if (audioElement.paused){
-  //   audioElement.play();
-  // }
-  // else
-  // {
-  //   audioElement.pause();
-  // }
-  loadSong();
+  if (audioElement.paused){
+    audioElement.play();
+  }
+  else
+  {
+    audioElement.pause();
+  }
 }
 
 function main() {
@@ -112,18 +111,18 @@ function main() {
   stats.domElement.style.top = '0px';
   document.body.appendChild(stats.domElement);
 
-  // audioContext = new AudioContext();
-  // audioElement = new Audio(audioFile);
-  // const track = audioContext.createMediaElementSource(audioElement);
-  // track.connect(audioContext.destination);
-  // const audioAnalyser = audioContext.createAnalyser();
-  // audioAnalyser.fftSize = 2048;
-  // const bufferLength = audioAnalyser.frequencyBinCount;
-  // const dataArray = new Uint8Array(bufferLength);
-  // audioAnalyser.getByteFrequencyData(dataArray);
-  // track.connect(audioAnalyser);
-//  audioElement.play();
- // audioElement.muted = true;
+  audioContext = new AudioContext();
+  audioElement = new Audio(audioFile);
+  const track = audioContext.createMediaElementSource(audioElement);
+  track.connect(audioContext.destination);
+  const audioAnalyser = audioContext.createAnalyser();
+  audioAnalyser.fftSize = 2048;
+  const bufferLength = audioAnalyser.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+  audioAnalyser.getByteFrequencyData(dataArray);
+  track.connect(audioAnalyser);
+  audioElement.play();
+
 
   // Add controls to the gui
   const gui = new DAT.GUI();
@@ -171,22 +170,22 @@ function main() {
 
   // This function will be called every frame
   function tick() {
-    // audioAnalyser.getByteFrequencyData(dataArray);
+    audioAnalyser.getByteFrequencyData(dataArray);
     let low: number = 0.0;
     let high: number = 0.0;
-    // for(var i = 0; i < audioAnalyser.frequencyBinCount; i++)
-    // {
-    //   if (i <audioAnalyser.frequencyBinCount / 5.0 )
-    //   {
-    //       low += dataArray[i]/256.0;
-    //   }
-    //   else
-    //   {
-    //       high += dataArray[i]/256.0
-    //   }
-    // }
-    // low /= dataArray.length / 5.0;
-    // high /= dataArray.length * 4.0 / 5.0;
+    for(var i = 0; i < audioAnalyser.frequencyBinCount; i++)
+    {
+      if (i <audioAnalyser.frequencyBinCount / 5.0 )
+      {
+          low += dataArray[i]/256.0;
+      }
+      else
+      {
+          high += dataArray[i]/256.0
+      }
+    }
+    low /= dataArray.length / 5.0;
+    high /= dataArray.length * 4.0 / 5.0;
     var time = controls.time + low * 1.0;
     var height = controls.height + high * 8.0;
     var madness = controls.madness + low * 0.01;
