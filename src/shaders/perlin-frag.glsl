@@ -31,15 +31,6 @@ float noise_gen1(vec3 p)
     return fract(sin((dot(p, vec3(127.1, 311.7, 191.999)))) * 43758.5453);
 }
 
-
-// vec3 noise_gen3(vec3 p)
-// {
-//   return fract(sin(vec3(dot(p, vec3(127.1f, 311.7f, 191.999f)),
-//                      dot(p, vec3(269.5f,183.3f, 472.6f)),
-//                      dot(p, vec3(377.4f,451.1f, 159.2f)))
-//                      * 43758.5453f));
-// }
-
 float interpNoise3D(vec3 noise)
 {
     int intX = int(floor(noise.x));

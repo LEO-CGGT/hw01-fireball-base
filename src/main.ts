@@ -9,27 +9,17 @@ import Camera from './Camera';
 import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 
+import audioFile from './assets/Elden Ring.mp3';
+
+
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
   tesselations: 5,
-  // 'Load Scene': loadScene, // A function pointer, essentially
-  // R: 1.0,
-  // G: 0.0,
-  // B: 0.0,
-  // A: 1.0,
-  // 'Lambert': changeToLambert,
-  // 'Perlin': changeToPerlin,
-  // 'Worley': changeToWorley,
-  // 'Custom': changeToCustom,
-  // 'Regular': changeToRegular,
-  // 'Expand': changeToExpand,
-  // 'Collapse': changeToCollapse,
-  // 'Distort':changeToDistort,
-  // 'Load Fireball':loadFireBall,
   'Reset Fireball': resetFireBall,
   height: 2.0,
-  time: 1.0,
+  time: 0.1,
+  'Play/Pause Music': playMusic,
 };
 
 var palette = {
@@ -41,53 +31,12 @@ let square: Square;
 let cube: Cube;
 let prevTesselations: number = 5;
 
-//var vertShader = require('./shaders/lambert-vert.glsl');
-//var fragShader = require('./shaders/lambert-frag.glsl');
-// function changeToLambert()
-// {
-//   fragShader = require('./shaders/lambert-frag.glsl');
-// }
-// function changeToPerlin()
-// {
-//   fragShader = require('./shaders/perlin-frag.glsl');
-// }
-// function changeToWorley()
-// {
-//   fragShader = require('./shaders/worley-frag.glsl');
-// }
-// function changeToCustom()
-// {
-//   fragShader = require('./shaders/custom-frag.glsl');
-// }
-// function changeToRegular()
-// {
-//   vertShader = require('./shaders/lambert-vert.glsl');
-// }
-// function changeToExpand()
-// {
-//   vertShader = require('./shaders/expand-vert.glsl');
-// }
-// function changeToCollapse()
-// {
-//   vertShader = require('./shaders/collapse-vert.glsl');
-// }
-// function changeToDistort()
-// {
-//   vertShader = require('./shaders/distort-vert.glsl');
-// }
-// function loadFireBall()
-// {
-//   vertShader = require('./shaders/fireball-vert.glsl');
-//   fragShader = require('./shaders/fireball-frag.glsl');
-// }
 function resetFireBall()
 {
   controls.height = 2.0;
   palette.color = [255.0, 0.0, 0.0, 1.0];
+  controls.time = 1.0;
 }
-//var prevFragShader = fragShader;
-//var prevVertShader = vertShader;
-
 
 function loadScene() {
   icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.tesselations);
@@ -98,6 +47,22 @@ function loadScene() {
   cube.create();
 }
 
+
+let audioContext : AudioContext;
+let audioElement: HTMLAudioElement;
+
+
+function playMusic() {
+  if (audioElement.paused){
+    audioElement.play();
+  }
+  else
+  {
+    audioElement.pause();
+  }
+}
+
+
 function main() {
   // Initial display for framerate
   const stats = Stats();
@@ -107,32 +72,26 @@ function main() {
   stats.domElement.style.top = '0px';
   document.body.appendChild(stats.domElement);
 
+  audioContext = new AudioContext();
+  audioElement = new Audio(audioFile);
+  const track = audioContext.createMediaElementSource(audioElement);
+  track.connect(audioContext.destination);
+  const audioAnalyser = audioContext.createAnalyser();
+  audioAnalyser.fftSize = 2048;
+  const bufferLength = audioAnalyser.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+  audioAnalyser.getByteFrequencyData(dataArray);
+  track.connect(audioAnalyser);
+  audioElement.play();
+
   // Add controls to the gui
   const gui = new DAT.GUI();
   gui.add(controls, 'tesselations', 0, 8).step(1);
-  // gui.add(controls, 'Load Scene');
-  // var colorGUI = gui.addFolder('Colors');
-  // colorGUI.add(controls, 'R', 0, 1).step(0.01);
-  // colorGUI.add(controls, 'G', 0, 1).step(0.01);
-  // colorGUI.add(controls, 'B', 0, 1).step(0.01);
-  // colorGUI.add(controls, 'A', 0, 1).step(0.01);
-  // var fragShaderGUI = gui.addFolder('Frag Shaders');
-  // fragShaderGUI.add(controls, 'Lambert');
-  // fragShaderGUI.add(controls, 'Perlin');
-  // fragShaderGUI.add(controls, 'Worley');
-  // fragShaderGUI.add(controls, 'Custom');
-  // var vertShaderGUI = gui.addFolder('Vert Shaders');
-  // vertShaderGUI.add(controls, 'Regular');
-  // vertShaderGUI.add(controls, 'Expand');
-  // vertShaderGUI.add(controls, 'Collapse');
-  // vertShaderGUI.add(controls, 'Distort');
-  
-  //var fireballGUI = gui.addFolder('Fireball');
   gui.add(controls, 'Reset Fireball');
-  gui.add(controls, 'height', 0, 10).step(0.1).name("Flame Height");
-  gui.addColor(palette, 'color').name("Flame Color");
-  gui.add(controls,'time',0, 2).step(0.1).name("Movement Speed");
-
+  gui.add(controls, 'height', 0, 10).step(0.1).name("Flame Height").listen();
+  gui.addColor(palette, 'color').name("Flame Color").listen();
+  gui.add(controls,'time',0, 2).step(0.1).name("Movement Speed").listen();
+  gui.add(controls, 'Play/Pause Music');
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -150,15 +109,10 @@ function main() {
   const camera = new Camera(vec3.fromValues(0, 0, 5), vec3.fromValues(0, 0, 0));
   const backgroundCamera = new Camera(vec3.fromValues(0, 0, -1), vec3.fromValues(0, 0, 0));
 
-
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.2, 0.2, 0.2, 1);
   gl.enable(gl.DEPTH_TEST);
   gl.depthFunc(gl.LEQUAL);
-  // const lambert = new ShaderProgram([
-  //   new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.glsl')),
-  //   new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag.glsl')),
-  // ]);
   const fireball = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/fireball-vert.glsl')),
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/fireball-frag.glsl')),
@@ -168,10 +122,32 @@ function main() {
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/background-frag.glsl')),
   ]);
 
-  const objToRender = [icosphere];
 
   // This function will be called every frame
   function tick() {
+    audioAnalyser.getByteFrequencyData(dataArray);
+    let low: number = 0.0;
+    let high: number = 0.0;
+    for(var i = 0; i < audioAnalyser.frequencyBinCount; i++)
+    {
+      //average += dataArray[i]/256.0;
+      //console.log(dataArray);
+      if (i <audioAnalyser.frequencyBinCount / 5.0 )
+      {
+          low += dataArray[i]/256.0;
+      }
+      else
+      {
+          high += dataArray[i]/256.0
+      }
+    }
+    low /= dataArray.length / 5.0;
+    high /= dataArray.length * 4.0 / 5.0;
+    //console.log(average);
+    var time = controls.time + low * 1.0;
+    //controls.time = 0.1 + average * 5.0;
+    var height = controls.height + high * 10.0;
+
     camera.update();
     stats.begin();
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
@@ -185,19 +161,10 @@ function main() {
       icosphere.create();
     }
 
-    var newShader = fireball;
-    // if (prevFragShader != fragShader || prevVertShader != vertShader)
-    // {
-    //     newShader = new ShaderProgram([
-    //     new Shader(gl.VERTEX_SHADER, vertShader),
-    //     new Shader(gl.FRAGMENT_SHADER, fragShader),
-    
-    //   ]);
-    // }
     gl.disable(gl.DEPTH_TEST);
-    renderer.render(backgroundCamera, background, [square], palette.color, controls.height, controls.time);
+    renderer.render(backgroundCamera, background, [square], palette.color, height, time);
     gl.enable(gl.DEPTH_TEST);
-    renderer.render(camera, newShader, objToRender, palette.color, controls.height, controls.time);
+    renderer.render(camera, fireball, [icosphere], palette.color, height, time);
 
     stats.end();
 

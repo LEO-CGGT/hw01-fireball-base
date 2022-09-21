@@ -163,7 +163,7 @@ void main()
     vec2 uv = gl_FragCoord.xy/u_CanvasSize.xy * 3.0;
     float time = u_Time / 2000.0;
 
-    vec3 col = vec3(83.0, u_Color.r * 2.0 / 3.0, 222.0) / 255.0;
+    vec3 col = vec3(clamp(u_Color.g + 35.0, 35.0, 255.0), u_Color.r / 3.0, 64.0) / 255.0;
     vec3 xiketic = vec3(5.0, 5.0, u_Color.r / 10.0) / 255.0;
 
     float fbm_worley = fbmWorley(1.0 * uv, 1.0);

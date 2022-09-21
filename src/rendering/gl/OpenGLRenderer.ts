@@ -38,7 +38,6 @@ class OpenGLRenderer {
     prog.setTime( this.timeCount);
     prog.setHeight(height);
     prog.setCanvasSize(this.canvas.width, this.canvas.height);
-    console.log(this.timeCount);
 
     this.prevTime = Date.now();
     for (let drawable of drawables) {
