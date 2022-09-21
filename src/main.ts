@@ -53,9 +53,20 @@ function loadScene() {
 function enableFrenzy()
 {
   if (frenzyMode == 0)
+  {
     frenzyMode = 1;
+    controls.height = 2.5;
+    controls.madness = 0.8;
+    controls.time = 0.3;
+  }
   else
+  {
     frenzyMode = 0; 
+    controls.height = 2;
+    controls.time = 0.1;
+    controls.madness = 0.6;
+
+  }
 }
 
 

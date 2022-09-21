@@ -313,21 +313,15 @@ void main()
 
     h = gain(u_Madness, h);
 
-    // For the eye
-    if (u_Frenzy > 0 && fs_Pos.z > 0.50)
-    {
-        h *= 0.7;
-    }
-
-
     modelposition = modelposition + fs_Nor * 0.5 * h * u_Height;
     
     fs_H = h;
 
+    // for the eye
     if (u_Frenzy > 0)
     {
-        modelposition.z /= 2.0;
-        fs_H = mix(0.0, 0.6, (1.0 - modelposition.z));
+        fs_H = mix(0.0, 0.4, (2.0 - modelposition.z));
+        modelposition.z /= 4.0;
     }
 
     fs_Pos = modelposition;
