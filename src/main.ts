@@ -73,6 +73,7 @@ function enableFrenzy()
 function playMusic() {
   if (audioElement.paused){
     audioElement.play();
+    audioElement.muted = true;
   }
   else
   {
