@@ -9,7 +9,7 @@ import Camera from './Camera';
 import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 
-import audioFile from './assets/Elden Ring.mp3';
+import audioFile from './assets/Elden_Ring.mp3';
 
 let audioContext : AudioContext;
 let audioElement: HTMLAudioElement;
@@ -43,7 +43,7 @@ function resetFireBall()
 function loadScene() {
   icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.tesselations);
   icosphere.create();
-  icosphere2 = new Icosphere(vec3.fromValues(0, 0, 1.4), 0.05, controls.tesselations);
+  icosphere2 = new Icosphere(vec3.fromValues(0, 0, 1), 0.05, controls.tesselations);
   icosphere2.create();
   square = new Square(vec3.fromValues(0, 0, 0));
   square.create();

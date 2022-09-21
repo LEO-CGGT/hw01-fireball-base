@@ -14,6 +14,7 @@ precision highp float;
 uniform vec4 u_Color; // The color with which to render this instance of geometry.
 
 uniform float u_Height;
+uniform vec2 u_CanvasSize; 
 
 // These are the interpolated values out of the rasterizer, so you can't know
 // their specific values without knowing the vertices that contributed to them
@@ -116,15 +117,22 @@ void main()
                                                             //to simulate ambient lighting. This ensures that faces that are not
                                                             //lit by our point light are not completely black.
 
+
+        vec2 uv = (gl_FragCoord.xy)/u_CanvasSize.xy;
+        vec2 center = vec2(0.5, 0.5);
+
         // Compute final shaded color
         vec3 white = vec3(252.0,246.0, 144.0);
-        vec3 yellow = vec3(244.0, 211.0, 51.0);
+        vec3 yellow = vec3(244.0, 211.0, 51.0)/ 255.0;;
         vec3 xiketic = vec3(5.0, 5.0, 25.0) / 255.0;
 
 
-        //vec3 color = mix(finalYellow, finalRed, fs_H);
-        //vec3 color = mix(yellow, xiketic, smoothstep(0.0, 1.0, fs_H));
-
-        out_Col = vec4(xiketic / 255.0, 1.0);
+        // if (length(uv - center) > 0.06)
+        // {
+        //     out_Col = vec4(mix(xiketic,white,length(uv - center)),1.0) ;
+        //     //out_Col = vec4(white, 1.0);
+        // }
+        // else
+        out_Col = vec4(xiketic, 1.0);
 
 }   
