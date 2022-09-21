@@ -71,14 +71,15 @@ function enableFrenzy()
 
 
 function playMusic() {
-  if (audioElement.paused){
-    audioElement.play();
-    audioElement.muted = true;
-  }
-  else
-  {
-    audioElement.pause();
-  }
+  // if (audioElement.paused){
+  //   audioElement.play();
+  // }
+  // else
+  // {
+  //   audioElement.pause();
+  // }
+   audioElement.play();
+
 }
 
 function main() {
@@ -100,7 +101,9 @@ function main() {
   const dataArray = new Uint8Array(bufferLength);
   audioAnalyser.getByteFrequencyData(dataArray);
   track.connect(audioAnalyser);
-  audioElement.play();
+//  audioElement.play();
+ // audioElement.muted = true;
+
 
   // Add controls to the gui
   const gui = new DAT.GUI();
