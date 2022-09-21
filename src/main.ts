@@ -27,26 +27,36 @@ const controls = {
   'The Flame of Frenzy': enableFrenzy,
 };
 
-// let loader: THREE.AudioLoader = new THREE.AudioLoader();
-// let listener: THREE.AudioListener = new THREE.AudioListener();
-// let audio: THREE.Audio = new THREE.Audio(listener);
-// let fftSize: number = 2048;
-// let analyzer: THREE.AudioAnalyser;
-// let songData: Uint8Array;
+let loader: THREE.AudioLoader = new THREE.AudioLoader();
+let listener: THREE.AudioListener = new THREE.AudioListener();
+let audio: THREE.Audio = new THREE.Audio(listener);
+let fftSize: number = 2048;
+let analyzer: THREE.AudioAnalyser;
+let songData: Uint8Array;
 
-// function loadSong(filename: string) {
-//   if (audio.isPlaying) audio.stop();
+// audioContext = new AudioContext();
+// audioElement = new Audio(audioFile);
+// const track = audioContext.createMediaElementSource(audioElement);
+// track.connect(audioContext.destination);
+// const audioAnalyser = audioContext.createAnalyser();
+// audioAnalyser.fftSize = 2048;
+// const bufferLength = audioAnalyser.frequencyBinCount;
+// const dataArray = new Uint8Array(bufferLength);
+// audioAnalyser.getByteFrequencyData(dataArray);
+// track.connect(audioAnalyser);
+// audioElement.play();
 
-//   var file = 'assets/' + filename + '.mp3';
-//   loader.load(file, function (buffer: any) {
-//     audio.setBuffer(buffer);
-//     audio.setLoop(true);
-//     audio.play();
-//   });
 
-//   analyzer = new THREE.AudioAnalyser(audio, fftSize);
-//   songData = analyzer.getFrequencyData();
-// }
+function loadSong() {
+  if (audio.isPlaying) audio.stop();
+  loader.load(audioFile, function (buffer: any) {
+    audio.setBuffer(buffer);
+    audio.setLoop(true);
+    audio.play();
+  });
+  analyzer = new THREE.AudioAnalyser(audio, fftSize);
+  songData = analyzer.getFrequencyData();
+}
 
 let icosphere: Icosphere;
 let icosphere2: Icosphere;
@@ -93,13 +103,24 @@ function enableFrenzy()
 
 
 function playMusic() {
-  if (audioElement.paused){
-    audioElement.play();
-  }
-  else
+  // if (audioElement.paused){
+  //   audioElement.play();
+  // }
+  // else
+  // {
+  //   audioElement.pause();
+  // }
+  loadSong();
+}
+
+function getAverage(data: Uint8Array)
+{
+  var total = 0;
+  data.forEach(function(d)
   {
-    audioElement.pause();
-  }
+      total+=d;
+  });
+  return total / data.length;
 }
 
 function main() {
@@ -111,17 +132,7 @@ function main() {
   stats.domElement.style.top = '0px';
   document.body.appendChild(stats.domElement);
 
-  audioContext = new AudioContext();
-  audioElement = new Audio(audioFile);
-  const track = audioContext.createMediaElementSource(audioElement);
-  track.connect(audioContext.destination);
-  const audioAnalyser = audioContext.createAnalyser();
-  audioAnalyser.fftSize = 2048;
-  const bufferLength = audioAnalyser.frequencyBinCount;
-  const dataArray = new Uint8Array(bufferLength);
-  audioAnalyser.getByteFrequencyData(dataArray);
-  track.connect(audioAnalyser);
-  audioElement.play();
+
 
 
   // Add controls to the gui
@@ -146,6 +157,7 @@ function main() {
 
   // Initial call to load scene
   loadScene();
+  loadSong();
 
   const camera = new Camera(vec3.fromValues(0, 0, 5), vec3.fromValues(0, 0, 0));
   const backgroundCamera = new Camera(vec3.fromValues(0, 0, -1), vec3.fromValues(0, 0, 0));
@@ -167,25 +179,32 @@ function main() {
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/background-frag.glsl')),
   ]);
 
-
   // This function will be called every frame
   function tick() {
-    audioAnalyser.getByteFrequencyData(dataArray);
-    let low: number = 0.0;
-    let high: number = 0.0;
-    for(var i = 0; i < audioAnalyser.frequencyBinCount; i++)
-    {
-      if (i <audioAnalyser.frequencyBinCount / 5.0 )
-      {
-          low += dataArray[i]/256.0;
-      }
-      else
-      {
-          high += dataArray[i]/256.0
-      }
-    }
-    low /= dataArray.length / 5.0;
-    high /= dataArray.length * 4.0 / 5.0;
+    //analyzer = new THREE.AudioAnalyser(audio, fftSize);
+    songData = analyzer.getFrequencyData();
+    
+    var lowerHalfArray = songData.slice(0, (songData.length/5) - 1);
+    var upperHalfArray = 
+    songData.slice((songData.length/5) - 1, songData.length - 1);
+
+    let low: number = getAverage(lowerHalfArray) /lowerHalfArray.length ;
+    let high: number = getAverage(upperHalfArray) /upperHalfArray.length;
+    console.log(low);
+    // for(var i = 0; i < songData.length; i++)
+    // {
+    //   if (i < songData.length / 5.0 )
+    //   {
+    //       low += songData[i]/256.0;
+    //   }
+    //   else
+    //   {
+    //       high += songData[i]/256.0
+    //   }
+    // }
+    
+    // low /= songData.length / 5.0;
+    // high /= songData.length * 4.0 / 5.0;
     var time = controls.time + low * 1.0;
     var height = controls.height + high * 8.0;
     var madness = controls.madness + low * 0.01;
