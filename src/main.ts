@@ -71,15 +71,13 @@ function enableFrenzy()
 
 
 function playMusic() {
-  // if (audioElement.paused){
-  //   audioElement.play();
-  // }
-  // else
-  // {
-  //   audioElement.pause();
-  // }
-   audioElement.play();
-
+  if (audioElement.paused){
+    audioElement.play();
+  }
+  else
+  {
+    audioElement.pause();
+  }
 }
 
 function main() {
