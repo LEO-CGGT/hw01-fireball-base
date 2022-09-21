@@ -122,15 +122,9 @@ void main()
         vec3 xiketic = vec3(5.0, 5.0, 25.0) / 255.0;
 
 
-
-        //vec3 finalYellow = mix(yellow,white, smoothstep(fbm3D(fs_Pos.xyz)));
-        //vec3 finalRed = mix(red, col, bias(0.6, fbm3D(fs_Pos.xyz)));
-        
-        vec3 c1 = mix(yellow, xiketic, bias(0.99, smoothstep(0.0, 1.0, fs_H)));
-
         //vec3 color = mix(finalYellow, finalRed, fs_H);
-        //vec3 color = mix(finalYellow, finalRed, smoothstep(0.0, 1.0, fs_H));
-        //out_Col = vec4(color.rgb  / 255.0, 1.0);
-        out_Col = vec4(c1 / 255.0, 1.0);
+        //vec3 color = mix(yellow, xiketic, smoothstep(0.0, 1.0, fs_H));
+
+        out_Col = vec4(xiketic / 255.0, 1.0);
 
 }   
