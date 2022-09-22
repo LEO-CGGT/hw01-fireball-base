@@ -11,9 +11,6 @@ import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 
 import audioFile from '/src/assets/Elden_Ring.mp3';
-
-let audioContext : AudioContext;
-let audioElement: HTMLAudioElement;
 let frenzyMode: number = 0;
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
@@ -34,25 +31,12 @@ let fftSize: number = 2048;
 let analyzer: THREE.AudioAnalyser;
 let songData: Uint8Array;
 
-// audioContext = new AudioContext();
-// audioElement = new Audio(audioFile);
-// const track = audioContext.createMediaElementSource(audioElement);
-// track.connect(audioContext.destination);
-// const audioAnalyser = audioContext.createAnalyser();
-// audioAnalyser.fftSize = 2048;
-// const bufferLength = audioAnalyser.frequencyBinCount;
-// const dataArray = new Uint8Array(bufferLength);
-// audioAnalyser.getByteFrequencyData(dataArray);
-// track.connect(audioAnalyser);
-// audioElement.play();
-
 
 function loadSong() {
   if (audio.isPlaying) audio.stop();
   loader.load(audioFile, function (buffer: any) {
     audio.setBuffer(buffer);
     audio.setLoop(true);
-    audio.play();
   });
   analyzer = new THREE.AudioAnalyser(audio, fftSize);
   songData = analyzer.getFrequencyData();
@@ -103,14 +87,8 @@ function enableFrenzy()
 
 
 function playMusic() {
-  // if (audioElement.paused){
-  //   audioElement.play();
-  // }
-  // else
-  // {
-  //   audioElement.pause();
-  // }
-  loadSong();
+  if (audio.isPlaying) audio.pause();
+  else audio.play();
 }
 
 function getAverage(data: Uint8Array)
@@ -132,12 +110,9 @@ function main() {
   stats.domElement.style.top = '0px';
   document.body.appendChild(stats.domElement);
 
-  analyzer = new THREE.AudioAnalyser(audio, fftSize);
-  songData = analyzer.getFrequencyData();
-  loader.load(audioFile, function (buffer: any) {
-    audio.setBuffer(buffer);
-    audio.setLoop(true);
-  });
+  // analyzer = new THREE.AudioAnalyser(audio, fftSize);
+  // songData = analyzer.getFrequencyData();
+  loadSong();
 
 
   // Add controls to the gui
