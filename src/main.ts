@@ -195,21 +195,7 @@ function main() {
 
     let low: number = getAverage(lowerHalfArray) /lowerHalfArray.length ;
     let high: number = getAverage(upperHalfArray) /upperHalfArray.length;
-    //console.log(high);
-    // for(var i = 0; i < songData.length; i++)
-    // {
-    //   if (i < songData.length / 5.0 )
-    //   {
-    //       low += songData[i]/256.0;
-    //   }
-    //   else
-    //   {
-    //       high += songData[i]/256.0
-    //   }
-    // }
-    
-    // low /= songData.length / 5.0;
-    // high /= songData.length * 4.0 / 5.0;
+
     var time = controls.time + high * 12.0;
     var height = controls.height + low * 1.5;
     var madness = controls.madness + low * 0.01;

@@ -158,6 +158,13 @@ float bias(float b, float t)
 {
     return pow(t, log(b) / log(0.5f));
 }
+float gain(float g, float t)
+{
+    if(t<0.5)
+    return bias(1.0-g, 2.0*t) /2.0;
+    else
+    return 1.0-bias(1.0-g, 2.0-2.0*t) / 2.0;
+}
 
 void main()
 {
@@ -178,9 +185,10 @@ void main()
     {
          c = fbm3D(vec3(uv + c, time + WorleyNoise(uv)));
     }
+    
 
-    vec3 col1 = mix(darkGreen, orange, bias(0.04, u_Madness)); 
-    vec3 col2 = mix(xiketic, darkRed, bias(0.04, u_Madness)); 
+    vec3 col1 = mix(darkGreen, orange, bias(0.02, u_Madness + 0.15)); 
+    vec3 col2 = mix(xiketic, darkRed, bias(0.02, u_Madness + 0.15)); 
 
 
     vec3 color = mix(col1, xiketic, c);

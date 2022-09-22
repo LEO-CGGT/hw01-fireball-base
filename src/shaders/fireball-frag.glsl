@@ -99,6 +99,7 @@ float gain(float g, float t)
     return 1.0-bias(1.0-g, 2.0-2.0*t) / 2.0;
 }
 
+
 void main()
 {
     // Material base color (before shading)
@@ -118,11 +119,6 @@ void main()
                                                             //lit by our point light are not completely black.
 
         // Compute final shaded color
-        //vec3 col = u_Color.rgb;
-        
-        //vec3 yellow = vec3(col.r,231.0,0.0);
-        //vec3 white = vec3(255.0, col.r, 206.0);
-        //vec3 red = vec3(col.r,col.r/3.0,0.0);
         vec3 white = vec3(252.0,246.0, 144.0);
         vec3 yellow = vec3(244.0, 211.0, 51.0);
         vec3 orange1 = vec3(212.0, 101.0, 41.0);
@@ -132,16 +128,8 @@ void main()
         vec3 darkRed = vec3(200.0, 0.0, 0.0);
 
         float blendWeight = fs_H;
-        //vec3 finalYellow = mix(yellow,white, smoothstep(fbm3D(fs_Pos.xyz)));
-        //vec3 finalRed = mix(red, col, bias(0.6, fbm3D(fs_Pos.xyz)));
-
-        // For the eye
-        // if (u_Frenzy > 0 && fs_Pos.z > 0.55)
-        // {
-        //     blendWeight = mix(0.0, 0.55, (1.0 - fs_Pos.z));
-        // }
         
-        vec3 c1 = mix(white, yellow, bias(0.7, smoothstep(0.0, 1.0, blendWeight)));
+        vec3 c1 = mix(white, yellow, bias(0.8, smoothstep(0.0, 1.0, blendWeight)));
         vec3 c2 = mix(c1, orange1, bias(0.85, smoothstep(0.0, 1.0, blendWeight)));
         vec3 c3 = mix(c2, orange2, bias(0.5, smoothstep(0.0, 1.0, blendWeight)));
 
