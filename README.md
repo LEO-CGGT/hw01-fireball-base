@@ -1,8 +1,17 @@
+# Flame of Frenzy
+Features: 
+* A realistic fireball that "dances" with the background music, with the low frequency sound controls the flame displacement distance and the high frequency sound controls the flame moving speed.
+* An animated background that also "dances" with the background music.
+* UI that allows the user to change the fire moving speed and how blazing it is. 
+* A "Flame of Frenzy" mode that changes the flame to the Flame of Frenzy. The "madness" bar controls how mad the flame is. 
+
+Click "Play/Pause Music" to start the music. Click "The Flame of Frenzy" to change its mode.
+
 # [Live Demo](https://leo-cggt.github.io/hw01-fireball-base/)
-![Current Look](img/demo.gif)   
+![regular fireball](img/demo.gif)   
+![flame of frenzy](img/demo2.gif)
 
-
-# [Project 1: Noise](https://github.com/CIS-566-Fall-2022/hw01-fireball-base)
+## [Project 1: Noise](https://github.com/CIS-566-Fall-2022/hw01-fireball-base)
 
 ## Objective
 
