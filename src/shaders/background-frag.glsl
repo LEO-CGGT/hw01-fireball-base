@@ -187,8 +187,8 @@ void main()
     }
     
 
-    vec3 col1 = mix(darkGreen, orange, bias(0.02, u_Madness + 0.15)); 
-    vec3 col2 = mix(xiketic, darkRed, bias(0.02, u_Madness + 0.15)); 
+    vec3 col1 = mix(darkGreen, orange,clamp(bias(0.0005, u_Madness + 0.21), 0.0, 1.0)); 
+    vec3 col2 = mix(xiketic, darkRed, clamp(bias(0.0005, u_Madness + 0.21), 0.0, 1.0)); 
 
 
     vec3 color = mix(col1, xiketic, c);
