@@ -47,16 +47,49 @@ const vec4 lightPos = vec4(5, 5, 3, 1); //The position of our virtual light, whi
 float fade(float t){
 	return ((6.0*t - 15.0)*t + 10.0)*t*t*t;
 }
+float noise_gen1_1(float x)
+{
+    return fract(sin(x * 127.1) * 43758.5453);
+}
 float noise_gen1(vec3 p)
 {
     return fract(sin((dot(p, vec3(127.1, 311.7, 191.999)))) * 43758.5453);
 }
-
+float noise_gen2_1( vec2 p) {
+    return fract(sin(dot(p.xy,
+                         vec2(12.9898,78.233)))*
+        43758.5453123);
+}
+vec2 noise_gen2_2(vec2 p)
+{
+    return fract(sin(vec2(dot(p, vec2(127.1f, 311.7f)),
+                     dot(p, vec2(269.5f,183.3f))))
+                     * 43758.5453f);
+}
 float noise_gen1_4D(vec4 p)
 {
     return fract(sin((dot(p, vec4(127.1, 311.7, 191.999, 433.7)))) * 43758.5453);
 }
-
+float interpNoise1D (float noise) {
+    float intX = float(floor(noise));
+    float fractX = fract(noise);
+    float v1 = noise_gen1_1(intX);
+    float v2 = noise_gen1_1(intX + 1.0);
+    return mix(v1, v2, fractX);
+}
+float interpNoise2D (vec2 noise) {
+    int intX = int(floor(noise.x));
+    float fractX = fract(noise.x);
+    int intY = int(floor(noise.y));
+    float fractY = fract(noise.y);
+    float v1 = noise_gen2_1(vec2(intX, intY));
+    float v2 = noise_gen2_1(vec2(intX + 1, intY));
+    float v3 = noise_gen2_1(vec2(intX, intY + 1));
+    float v4 = noise_gen2_1(vec2(intX + 1, intY + 1));
+    float i1 = mix(v1, v2, fractX);
+    float i2 = mix(v3, v4, fractX);
+    return mix(i1, i2, fractY);
+}
 float interpNoise3D(vec3 noise)
 {
     int intX = int(floor(noise.x));
@@ -139,7 +172,38 @@ float interpNoise4D(vec4 noise)
     return mix(iii1, iii2, fractW);
 
 }
-
+float fbm1D(float noise)
+{
+    float total = 0.0f;
+    float persistence = 0.5f;
+    int octaves = 8;
+    float freq = 2.0f;
+    float amp = 0.5f;
+    
+    for (int i=1; i<=octaves; i++)
+    {
+        total += interpNoise1D(noise * freq) * amp;
+        freq *= 2.0f;
+        amp *= persistence;
+    }
+    return total;
+}
+float fbm2D(vec2 noise)
+{
+    float total = 0.0f;
+    float persistence = 0.5f;
+    int octaves = 8;
+    float freq = 2.0f;
+    float amp = 0.5f;
+    
+    for (int i=1; i<=octaves; i++)
+    {
+        total += interpNoise2D(noise * freq) * amp;
+        freq *= 2.0f;
+        amp *= persistence;
+    }
+    return total;
+}
 float fbm3D(vec3 noise)
 {
     float total = 0.0f;
@@ -181,6 +245,28 @@ vec3 random3(vec3 p)
 }
 
 // WorleyNoise function copied from the lecture notes
+float WorleyNoise2D(vec2 p) 
+{
+    vec2 pInt = floor(p);
+    vec2 pFract = fract(p);
+    float minDist = 1.0; // Minimum distance initialized to max.
+            for(int y = -1; y <= 1; ++y) 
+        {
+            for(int x = -1; x <= 1; ++x) 
+            {
+                vec2 neighbor = vec2(float(x), float(y)); // Direction in which neighbor cell lies
+                vec2 point = noise_gen2_2(pInt + neighbor); // Get the Voronoi centerpoint for the neighboring cell
+                
+                point = 0.5 + 0.5*sin(u_Time / 1000.0 + 6.2831*point);
+                
+                vec2 diff = neighbor + point - pFract; // Distance between fragment coord and neighbor’s Voronoi point
+                float dist = length(diff);
+                minDist = min(minDist, dist);
+            }
+        }
+    return minDist;
+}
+
 float WorleyNoise(vec3 p) 
 {
     vec3 pInt = floor(p);
@@ -321,7 +407,8 @@ void main()
     if (u_Frenzy > 0)
     {
         fs_H = mix(0.0, 0.4, (2.0 - modelposition.z));
-        modelposition.z /= 4.0;
+        modelposition.z /= 6.0;
+        modelposition.z += 0.5 * fbm1D(length(vs_Pos.xy));
     }
 
     fs_Pos = modelposition;

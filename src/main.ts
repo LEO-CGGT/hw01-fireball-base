@@ -75,7 +75,7 @@ function resetFireBall()
 function loadScene() {
   icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.tesselations);
   icosphere.create();
-  icosphere2 = new Icosphere(vec3.fromValues(0, 0, 1), 0.05, controls.tesselations);
+  icosphere2 = new Icosphere(vec3.fromValues(0, 0, 10.0), 1, controls.tesselations);
   icosphere2.create();
   square = new Square(vec3.fromValues(0, 0, 0));
   square.create();
@@ -88,7 +88,7 @@ function enableFrenzy()
   {
     frenzyMode = 1;
     controls.height = 2.5;
-    controls.madness = 0.8;
+    controls.madness = 0.7;
     controls.time = 0.3;
   }
   else
@@ -132,7 +132,12 @@ function main() {
   stats.domElement.style.top = '0px';
   document.body.appendChild(stats.domElement);
 
-
+  analyzer = new THREE.AudioAnalyser(audio, fftSize);
+  songData = analyzer.getFrequencyData();
+  loader.load(audioFile, function (buffer: any) {
+    audio.setBuffer(buffer);
+    audio.setLoop(true);
+  });
 
 
   // Add controls to the gui
@@ -140,7 +145,7 @@ function main() {
   gui.add(controls, 'Reset Fireball');
   gui.add(controls, 'Play/Pause Music');
   gui.add(controls, 'tesselations', 0, 8).step(1);
-  gui.add(controls, 'height', 0, 5).step(0.1).name("Flame Height").listen();
+  gui.add(controls, 'height', 0, 4).step(0.1).name("Flame Height").listen();
   gui.add(controls,'time',0, 2).step(0.1).name("Movement Speed").listen();
   gui.add(controls, 'madness', 0.01, 0.90).step(0.01).name("Madness").listen();
   gui.add(controls, 'The Flame of Frenzy');
@@ -157,7 +162,7 @@ function main() {
 
   // Initial call to load scene
   loadScene();
-  loadSong();
+  //loadSong();
 
   const camera = new Camera(vec3.fromValues(0, 0, 5), vec3.fromValues(0, 0, 0));
   const backgroundCamera = new Camera(vec3.fromValues(0, 0, -1), vec3.fromValues(0, 0, 0));
@@ -184,13 +189,13 @@ function main() {
     //analyzer = new THREE.AudioAnalyser(audio, fftSize);
     songData = analyzer.getFrequencyData();
     
-    var lowerHalfArray = songData.slice(0, (songData.length/5) - 1);
+    var lowerHalfArray = songData.slice(0, (songData.length/6) - 1);
     var upperHalfArray = 
-    songData.slice((songData.length/5) - 1, songData.length - 1);
+    songData.slice((songData.length/6) - 1, songData.length - 1);
 
     let low: number = getAverage(lowerHalfArray) /lowerHalfArray.length ;
     let high: number = getAverage(upperHalfArray) /upperHalfArray.length;
-    console.log(low);
+    //console.log(high);
     // for(var i = 0; i < songData.length; i++)
     // {
     //   if (i < songData.length / 5.0 )
@@ -205,8 +210,8 @@ function main() {
     
     // low /= songData.length / 5.0;
     // high /= songData.length * 4.0 / 5.0;
-    var time = controls.time + low * 1.0;
-    var height = controls.height + high * 8.0;
+    var time = controls.time + high * 12.0;
+    var height = controls.height + low * 1.5;
     var madness = controls.madness + low * 0.01;
     if (frenzyMode == 0)
     camera.update();
@@ -232,9 +237,14 @@ function main() {
     
     if (frenzyMode == 1)
     {
-      gl.disable(gl.DEPTH_TEST);
+      //gl.disable(gl.DEPTH_TEST);
+      gl.enable(gl.BLEND);
+      gl.enable(gl.SRC_ALPHA);
+      gl.enable( gl.ONE_MINUS_SRC_ALPHA);
+      gl.enable(gl.BLEND_SRC_ALPHA);
+
       renderer.render(camera, flat, [icosphere2],height, time, madness, frenzyMode);
-      gl.enable(gl.DEPTH_TEST);
+      //gl.enable(gl.DEPTH_TEST);
     }  
     stats.end();
 

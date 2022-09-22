@@ -39,6 +39,8 @@ out vec4 fs_Nor;            // The array of normals that has been transformed by
 out vec4 fs_LightVec;       // The direction in which our virtual light lies, relative to each vertex. This is implicitly passed to the fragment shader.
 out vec4 fs_Col;            // The color of each vertex. This is implicitly passed to the fragment shader.
 
+out float fs_Theta;
+
 out float fs_H; // displacement
 
 const vec4 lightPos = vec4(5, 5, 3, 1); //The position of our virtual light, which is used to compute the shading of
@@ -299,7 +301,8 @@ void main()
 
     vec4 modelposition = u_Model * vs_Pos;   // Temporarily store the transformed vertex positions for use below
 
-    float theta = atan(modelposition.y / modelposition.x);
+    float theta = atan(vs_Pos.y / vs_Pos.x);
+    fs_Theta = theta;
     float phi = atan(length(modelposition.xy) / modelposition.z);
 
 
@@ -308,16 +311,22 @@ void main()
 
     for (int i=0; i<1;i++)
     {
-         h = fbm4D(vec4(vs_Pos.xyz + h, u_Time/1000.0 + WorleyNoise(modelposition.xyz) ));
+         h = fbm4D(vec4(vs_Pos.xyz + h, u_Time/1000.0 + WorleyNoise(vs_Pos.xyz) ));
     }
 
-    h = gain(u_Madness / 2.0, h);
+    h = gain(u_Madness - 0.1, h);
 
-    modelposition = modelposition + fs_Nor * 0.2 * h * u_Height;
+        //fs_Pos = vs_Pos;
+
+    //if (abs(dot(fs_Nor.xyz, vec3(0.0,0.0,1.0))) < 0.5)
+    modelposition = modelposition + fs_Nor * 4.0 * h * (u_Height * 0.5);
+    modelposition.xyz *= 0.08;
     fs_H = h;
+    
+    modelposition.z /= 2.0;
 
     fs_Pos = modelposition;
-    
+
     fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies
     gl_Position = u_ViewProj * modelposition;// gl_Position is a built-in variable of OpenGL which is
                                              // used to render the final positions of the geometry's vertices
