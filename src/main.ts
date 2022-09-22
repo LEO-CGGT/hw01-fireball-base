@@ -18,9 +18,9 @@ const controls = {
   tesselations: 6,
   'Reset Fireball': resetFireBall,
   height: 2.0,
-  time: 0.1,
+  time: 0.15,
   'Play/Pause Music': playMusic,
-  madness: 0.6,
+  madness: 0.5,
   'The Flame of Frenzy': enableFrenzy,
 };
 
@@ -51,8 +51,8 @@ function resetFireBall()
 {
   controls.tesselations = 5;
   controls.height = 2.0;
-  controls.time = 0.1;
-  controls.madness = 0.6;
+  controls.time = 0.15;
+  controls.madness = 0.5;
   frenzyMode = 0;
 }
 
@@ -79,8 +79,8 @@ function enableFrenzy()
   {
     frenzyMode = 0; 
     controls.height = 2;
-    controls.time = 0.1;
-    controls.madness = 0.6;
+    controls.time = 0.15;
+    controls.madness = 0.5;
 
   }
 }
@@ -137,7 +137,6 @@ function main() {
 
   // Initial call to load scene
   loadScene();
-  //loadSong();
 
   const camera = new Camera(vec3.fromValues(0, 0, 5), vec3.fromValues(0, 0, 0));
   const backgroundCamera = new Camera(vec3.fromValues(0, 0, -1), vec3.fromValues(0, 0, 0));
@@ -171,8 +170,8 @@ function main() {
     let low: number = getAverage(lowerHalfArray) /lowerHalfArray.length ;
     let high: number = getAverage(upperHalfArray) /upperHalfArray.length;
 
-    var time = controls.time + high * 12.0;
-    var height = controls.height + low * 1.5;
+    var time = controls.time + high * 14.0;
+    var height = controls.height + low * 1.8;
     var madness = controls.madness + low * 0.01;
     if (frenzyMode == 0)
     camera.update();
